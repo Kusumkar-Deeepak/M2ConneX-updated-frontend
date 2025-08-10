@@ -64,7 +64,6 @@ const Post = ({
           }
         )
         .then((res) => {
-          // console.log(res);
           setIsLiked(false);
           setLikesCount(likesCount - 1);
         })
@@ -87,7 +86,6 @@ const Post = ({
         }
       )
       .then((res) => {
-        // console.log(res);
         setIsLiked(true);
         setLikesCount(likesCount + 1);
       })
@@ -219,426 +217,319 @@ const Post = ({
   };
 
   return (
-    <>
-      <div
-        className={`${
-          !isSeparate && "my-2"
-        } shadow-sm border border-gray p-3 rounded-lg w-[96%] bg-white`}
-      >
-        <div className="flex justify-between items-center">
-          <div className="flex flex-row justify-center items-center w-full">
-            <div className="flex flex-row justify-start items-center w-full gap-x-3">
+    <div className="w-full">
+      {/* User Header */}
+      <div className="flex items-center justify-between p-4">
+        <div className="flex items-center">
+          <div className="w-12 h-12 rounded-full overflow-hidden mr-3">
+            {post.profilePicture ? (
+              <img
+                src={post.profilePicture}
+                alt={post.userName}
+                className="w-full h-full object-cover cursor-pointer"
+                onClick={() => navigate("/users/" + post.user)}
+              />
+            ) : (
               <div
-                className=" border-[#bc383e] border-2 ml-0 flex justify-center items-center rounded-[3rem] w-[3.5rem] h-[3.5rem] cursor-pointer"
-                onClick={() => {
-                  navigate("/users/" + post.user);
-                }}
+                className="w-full h-full bg-gray-300 flex items-center justify-center cursor-pointer"
+                onClick={() => navigate("/users/" + post.user)}
               >
-                {post.profilePicture && (
-                  <i className="fa-solid" style={{ color: "#bc383e" }}>
-                    <img
-                      className="w-full h-full object-cover rounded-[2.9rem]"
-                      src={post.profilePicture}
-                      alt=""
-                    />
-                  </i>
-                )}
-                {!post.profilePicture && (
-                  <i
-                    className="fa-solid fa-user fa-xl"
-                    style={{ color: "#bc383e" }}
-                  >
-                    <img src={post.profilePicture} alt="" />
-                  </i>
-                )}
-              </div>
-              <div
-                className="flex flex-col justify-center items-start hover:cursor-pointer"
-                onClick={() => {
-                  navigate("/users/" + post.user);
-                }}
-              >
-                <div>
-                  <h2 className="text-md font-medium hover:text-blue">
-                    {post.userName}
-                  </h2>
-                </div>
-                <p className="text-xs">{post.userBio.slice(0, 70) + "..."}</p>
-                <div className="flex flex-row gap-x-2 py-1 items-center">
-                  <p className="text-xs">{formatDate(post.createdAt)}</p>
-                  <p className="text-xs">
-                    {post.isPublic ? (
-                      <i
-                        className="fa-solid fa-globe-asia fa-md"
-                        style={{ color: "#000" }}
-                      ></i>
-                    ) : (
-                      <i
-                        className="fa-solid fa-user-lock fa-md"
-                        style={{ color: "#000" }}
-                      ></i>
-                    )}
-                  </p>
-                </div>
-              </div>
-            </div>
-            {!post.isEditable && (
-              <div className="flex">
-                {postUserIsConnected == "not_connected" && (
-                  <button
-                    key={post.id}
-                    className="border border-gray rounded-l-full rounded-r-full text-gray-500 font-medium w-40 h-10 hover:bg-[#ebebebeb] hover:border-2 transition duration-100 ease-in-out"
-                    onClick={(e) => {
-                      handleConnect(e, post.user);
-                      setPostUserIsConnected("pending");
-                    }}
-                  >
-                    <i className="fa-solid fa-user-plus mr-2 "></i>
-                    Connect
-                  </button>
-                )}
-                {postUserIsConnected == "pending" && (
-                  <button
-                    key={post.id}
-                    className="border border-gray rounded-l-full rounded-r-full text-gray-500 font-medium w-40 h-10 bg-[#ebebebeb]"
-                    disabled
-                  >
-                    <i className="fa-solid fa-check mr-2 "></i>
-                    Requested
-                  </button>
-                )}
+                <i className="fas fa-user text-gray-600"></i>
               </div>
             )}
           </div>
-          {post.isEditable && !isEditing && (
+          <div className="flex-1">
+            <h4
+              className="font-semibold text-gray-900 text-sm cursor-pointer hover:text-blue-600 transition-colors duration-200"
+              onClick={() => navigate("/users/" + post.user)}
+            >
+              {post.userName}
+            </h4>
+            <p className="text-gray-500 text-xs">
+              {post.userBio && post.userBio.slice(0, 70) + "..."}
+            </p>
+            <div className="flex items-center space-x-2 text-xs text-gray-500">
+              <span>{formatDate(post.createdAt)}</span>
+              <span>•</span>
+              {post.isPublic ? (
+                <i className="fas fa-globe-americas"></i>
+              ) : (
+                <i className="fas fa-lock"></i>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Connect Button or Edit Button */}
+        <div className="flex items-center space-x-2">
+          {!post.isEditable && postUserIsConnected === "not_connected" && (
             <button
-              className="flex justify-center items-center gap-x-2"
-              onClick={() => {
-                console.log(images);
-                setIsEditing(true);
+              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors duration-200"
+              onClick={(e) => {
+                handleConnect(e, post.user);
+                setPostUserIsConnected("pending");
               }}
             >
-              <i
-                className="fa-solid fa-edit fa-md"
-                style={{ color: "#000" }}
-              ></i>
+              <i className="fas fa-user-plus mr-2"></i>
+              Connect
             </button>
           )}
-        </div>
-        <div className="my-2">
-          {post.images.length > 0 && !isEditing && (
-            <>
-              <div className="my-3 text-[1rem] wrap">
-                {/* <pre className="">
-                    <span className="inner-pre" style={{ fontFamily: "arial" }}>
-                      {post.body}
-                    </span>
-                  </pre> */}
-                {post.body.slice(0, 500) + "..."} <br />
-                <div
-                  className="text-blue cursor-pointer hover:font-bold"
-                  onClick={() => {
-                    navigate("/feed/" + post.id);
-                  }}
-                >
-                  See More
-                </div>
-              </div>
-              <div className="w-full h-100 bg-[#d4d9d9] my-4">
-                <PostCarousel post={post} />
-              </div>
-            </>
-          )}
-          {post.images.length === 0 && !isEditing && !isSeparate && (
-            <div
-              className="my-4 text-[1rem] cursor-pointer"
-              onClick={() => {
-                navigate("/feed/" + post.id);
-              }}
+
+          {!post.isEditable && postUserIsConnected === "pending" && (
+            <button
+              className="bg-gray-200 text-gray-600 text-sm font-medium px-4 py-2 rounded-lg cursor-not-allowed"
+              disabled
             >
-              {/* <pre>{post.body}</pre> */}
-              {post.body.slice(0, 500) + "..."} <br />
-              <div
-                className="text-blue cursor-pointer hover:font-bold"
-                onClick={() => {
-                  navigate("/feed/" + post.id);
-                }}
+              <i className="fas fa-check mr-2"></i>
+              Requested
+            </button>
+          )}
+
+          {post.isEditable && !isEditing && (
+            <button
+              className="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+              onClick={() => setIsEditing(true)}
+            >
+              <i className="fas fa-edit"></i>
+            </button>
+          )}
+
+          <button className="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+            <i className="fas fa-ellipsis-h"></i>
+          </button>
+        </div>
+      </div>
+
+      {/* Post Content */}
+      {!isEditing && (
+        <div className="px-4 pb-3">
+          <p className="text-gray-800 text-sm leading-relaxed">
+            {isSeparate ? post.body : post.body.slice(0, 500) + "..."}
+            {!isSeparate && (
+              <span
+                className="text-blue-600 cursor-pointer hover:underline ml-1"
+                onClick={() => navigate("/feed/" + post.id)}
               >
                 See More
-              </div>
-            </div>
-          )}
-          {post.images.length === 0 && !isEditing && isSeparate && (
-            <div className="my-4 text-[1rem]">
-              {/* <pre>{post.body}</pre> */}
-              {post.body}
-            </div>
-          )}
-          {isEditing && (
-            <div className="my-3 text-[1rem]">
-              <div className="">
-                <textarea
-                  name=""
-                  id=""
-                  cols="20"
-                  rows="5"
-                  className="rounded w-full p-4 border-none outline-gray resize-none"
-                  placeholder="Share your thoughts"
-                  value={body}
-                  onChange={(e) => {
-                    if (e.target.value.length > 3600) {
-                      return;
-                    }
-                    setBody(e.target.value);
-                    setCharCount(e.target.value.length);
-                  }}
-                ></textarea>
-                <div className="flex flex-col justify-between p-4">
-                  <p className="text-sm">Add Images</p>
-                  <KeywordInput
-                    value={images}
-                    setValue={setImages}
-                    flex={"col"}
-                    itemsAlignment={"start"}
-                    links={true}
-                    placeholder={"Type and press Enter to add image links..."}
-                  />
-                </div>
-                <div className="flex flex-col justify-between p-4">
-                  <p className="text-sm">Add Keywords</p>
-                  <KeywordInput
-                    value={subject}
-                    setValue={setSubject}
-                    flex={"wrap"}
-                    itemsAlignment={"center"}
-                    links={false}
-                    placeholder={"Type and press Enter to add keywords..."}
-                  />
-                </div>
-                <div className="flex justify-between items-center p-4">
-                  <div className="flex justify-start items-center gap-x-3">
-                    <input
-                      type="checkbox"
-                      name=""
-                      id=""
-                      className="w-5 h-5"
-                      checked={connectionOnly}
-                      onChange={(e) => {
-                        setConnectionOnly(e.target.checked);
-                      }}
-                    />
-                    <p className="text-sm">Connection-Only</p>
-                  </div>
-                  <p className="text-sm">{charCount}/3600 Characters</p>
-                </div>
-              </div>
-            </div>
-          )}
-          <div className="flex justify-between items-center">
-            {!isEditing && (
-              <>
-                <div className="flex justify-start items-center gap-x-3">
-                  <button
-                    className="flex justify-center items-center gap-x-2"
-                    onClick={handleLike}
-                  >
-                    {!isLiked && (
-                      <i
-                        className="fa-solid fa-arrow-up fa-lg"
-                        style={{ color: "#000" }}
-                        onMouseEnter={(e) => {
-                          e.target.style.color = "#FF5555";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.color = "#000";
-                        }}
-                      ></i>
-                    )}
-                    {isLiked && (
-                      <i
-                        className="fa-solid fa-arrow-up fa-lg"
-                        style={{ color: "#FF5555" }}
-                        onMouseEnter={(e) => {
-                          e.target.style.color = "#000";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.color = "#FF5555";
-                        }}
-                      ></i>
-                    )}
-                    <span>{likesCount}</span>
-                  </button>
-
-                  <button
-                    className="flex justify-center items-center gap-x-2"
-                    onClick={handleCommentSectionExpand}
-                  >
-                    {!isCommentSectionExpanded && (
-                      <i
-                        className="fa-regular fa-comment fa-lg"
-                        style={{ color: "#000" }}
-                        onMouseEnter={(e) => {
-                          e.target.style.color = "#FF5555";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.color = "#000";
-                        }}
-                      ></i>
-                    )}
-                    {isCommentSectionExpanded && (
-                      <i
-                        className="fa-regular fa-comment fa-lg"
-                        style={{ color: "#FF5555" }}
-                        onMouseEnter={(e) => {
-                          e.target.style.color = "#000";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.color = "#FF5555";
-                        }}
-                      ></i>
-                    )}
-                    <span>{post.commentsCount}</span>
-                  </button>
-
-                  <button className="flex justify-center items-center gap-x-2">
-                    <i
-                      className="fa-solid fa-retweet fa-lg"
-                      style={{ color: "#000", transform: "rotate(90deg)" }}
-                      onMouseEnter={(e) => {
-                        e.target.style.color = "#FF5555";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.color = "#000";
-                      }}
-                    ></i>
-                    <span>{post.sharesCount}</span>
-                  </button>
-                </div>
-                <div>
-                  <button
-                    className="flex justify-center items-center gap-x-2"
-                    onClick={() => {
-                      navigator.clipboard.writeText(
-                        window.location.href + "/" + post.id
-                      );
-                      toast.success("Link Copied to Clipboard");
-                    }}
-                  >
-                    <i
-                      className="fa-solid fa-share fa-lg"
-                      style={{ color: "#000" }}
-                      onMouseEnter={(e) => {
-                        e.target.style.color = "#FF5555";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.color = "#000";
-                      }}
-                    ></i>
-                  </button>
-                </div>
-              </>
+              </span>
             )}
-            {isEditing && (
+          </p>
+        </div>
+      )}
+
+      {/* Editing Mode */}
+      {isEditing && (
+        <div className="px-4 pb-3">
+          <textarea
+            className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            rows="5"
+            placeholder="Share your thoughts..."
+            value={body}
+            onChange={(e) => {
+              if (e.target.value.length > 3600) return;
+              setBody(e.target.value);
+              setCharCount(e.target.value.length);
+            }}
+          />
+
+          <div className="mt-4 space-y-4">
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                Add Images
+              </p>
+              <KeywordInput
+                value={images}
+                setValue={setImages}
+                flex={"col"}
+                itemsAlignment={"start"}
+                links={true}
+                placeholder={"Type and press Enter to add image links..."}
+              />
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                Add Keywords
+              </p>
+              <KeywordInput
+                value={subject}
+                setValue={setSubject}
+                flex={"wrap"}
+                itemsAlignment={"center"}
+                links={false}
+                placeholder={"Type and press Enter to add keywords..."}
+              />
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="connectionOnly"
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                  checked={connectionOnly}
+                  onChange={(e) => setConnectionOnly(e.target.checked)}
+                />
+                <label
+                  htmlFor="connectionOnly"
+                  className="text-sm text-gray-700"
+                >
+                  Connection-Only
+                </label>
+              </div>
+              <span className="text-sm text-gray-500">
+                {charCount}/3600 Characters
+              </span>
+            </div>
+
+            <div className="flex justify-end space-x-3">
               <button
-                className="flex justify-center items-center gap-x-2"
+                className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200"
+                onClick={() => setIsEditing(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 text-black bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors duration-200"
                 onClick={handleEditSave}
               >
-                <div className="flex justify-center items-center gap-x-2">
-                  Save
-                  <i
-                    className="fa-solid fa-check fa-lg rounded-full p-4 mr-1 hover:cursor-pointer"
-                    style={{
-                      color: "black",
-                      backgroundColor: "white",
-                      border: "1px solid black",
-                      marginRight: "1rem",
-                      transition: "all 0.3s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = "black";
-                      e.target.style.color = "white";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = "white";
-                      e.target.style.color = "black";
-                    }}
-                  ></i>
-                </div>
+                Save Changes
               </button>
-            )}
+            </div>
           </div>
         </div>
-        <div
-          className={`${
-            isCommentSectionExpanded ? "block" : "hidden"
-          } w-full border-t-2 border-[#9D9494] mt-2`}
-        >
-          {/* Comment input bar and send button */}
-          <div className="flex justify-between items-center mt-3">
+      )}
+
+      {/* Post Images */}
+      {post.images && post.images.length > 0 && !isEditing && (
+        <div className="px-4 pb-3">
+          <div className="rounded-lg overflow-hidden bg-gray-100">
+            <PostCarousel post={post} />
+          </div>
+        </div>
+      )}
+
+      {/* Divider */}
+      <hr className="border-gray-200 mx-4" />
+
+      {/* Action Buttons */}
+      {!isEditing && (
+        <div className="flex items-center justify-between px-4 py-3">
+          <button
+            className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex-1"
+            onClick={handleLike}
+          >
+            <i
+              className={`fas fa-arrow-up ${
+                isLiked ? "text-red-500" : "text-gray-500"
+              }`}
+            ></i>
+            <span className="text-sm text-gray-600 hidden sm:block">Like</span>
+            <span className="text-sm text-gray-600">{likesCount}</span>
+          </button>
+
+          <button
+            className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex-1"
+            onClick={handleCommentSectionExpand}
+          >
+            <i
+              className={`far fa-comment ${
+                isCommentSectionExpanded ? "text-blue-500" : "text-gray-500"
+              }`}
+            ></i>
+            <span className="text-sm text-gray-600 hidden sm:block">
+              Comment
+            </span>
+            <span className="text-sm text-gray-600">{post.commentsCount}</span>
+          </button>
+
+          <button className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex-1">
+            <i
+              className="fas fa-retweet text-gray-500"
+              style={{ transform: "rotate(90deg)" }}
+            ></i>
+            <span className="text-sm text-gray-600 hidden sm:block">Share</span>
+            <span className="text-sm text-gray-600">{post.sharesCount}</span>
+          </button>
+
+          <button
+            className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex-1"
+            onClick={() => {
+              navigator.clipboard.writeText(
+                window.location.href + "/" + post.id
+              );
+              toast.success("Link Copied to Clipboard");
+            }}
+          >
+            <i className="fas fa-share text-gray-500"></i>
+            <span className="text-sm text-gray-600 hidden sm:block">Copy</span>
+          </button>
+        </div>
+      )}
+
+      {/* Comments Section */}
+      {isCommentSectionExpanded && (
+        <div className="border-t border-gray-200 px-4 py-4">
+          {/* Comment Input */}
+          <div className="flex items-center space-x-3 mb-4">
             <input
               type="text"
-              className="w-full h-10 px-4 m-1 border-2 border-[#9D9494] rounded-md outline-none focus:border-[#FF5555]"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Add a comment..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
             <button
-              className="flex justify-center items-center gap-x-2"
+              className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200"
               onClick={handleComment}
             >
-              <i
-                className="fa-solid fa-paper-plane fa-lg hover:text-[#FF5555] m-1"
-                style={{ color: "#000" }}
-              ></i>
+              <i className="fas fa-paper-plane"></i>
             </button>
           </div>
-          {comments.length != 0 ? (
-            <div className="flex flex-col justify-left items-left gap-x-2">
-              <div className="m-2 self-center">Comments</div>
+
+          {/* Comments List */}
+          {comments.length > 0 ? (
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-gray-900">Comments</h4>
               {comments.map((comment) => (
-                <div
-                  className="flex justify-start items-center gap-x-2 m-1"
-                  key={comment.id}
-                >
-                  <div className=" border-[#bc383e] border-2 ml-4 flex justify-center items-center rounded-[1.5rem] w-[2rem] h-[2rem]">
-                    {comment.profilePicture && (
-                      <i className="fa-solid" style={{ color: "#bc383e" }}>
-                        <img
-                          className="w-full h-full object-cover rounded-[1.3rem]"
-                          src={comment.profilePicture}
-                          alt=""
-                        />
-                      </i>
-                    )}
-                    {!comment.profilePicture && (
-                      <i
-                        className="fa-solid fa-user fa-xl"
-                        style={{ color: "#bc383e" }}
-                      >
-                        <img src={comment.profilePicture} alt="" />
-                      </i>
+                <div key={comment.id} className="flex items-start space-x-3">
+                  <div className="w-8 h-8 rounded-full overflow-hidden">
+                    {comment.profilePicture ? (
+                      <img
+                        src={comment.profilePicture}
+                        alt={comment.userName}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                        <i className="fas fa-user text-gray-600 text-xs"></i>
+                      </div>
                     )}
                   </div>
-                  <div>
-                    <div className="flex justify-start items-center gap-x-2">
-                      <h2 className="text-xs font-medium">
-                        {comment.userName} {" • "}
-                      </h2>
-                      <p className="text-xs">{formatDate(comment.createdAt)}</p>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm font-medium text-gray-900">
+                        {comment.userName}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {formatDate(comment.createdAt)}
+                      </span>
                     </div>
-                    <p className="text-xs">{comment.comment}</p>
+                    <p className="text-sm text-gray-700 mt-1">
+                      {comment.comment}
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="flex justify-center items-center gap-x-2">
-              <div className="m-2 self-center">No Comments</div>
+            <div className="text-center py-4">
+              <p className="text-sm text-gray-500">No comments yet</p>
             </div>
           )}
         </div>
-      </div>
-    </>
+      )}
+    </div>
   );
 };
 

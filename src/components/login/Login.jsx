@@ -105,7 +105,7 @@ export default function Login() {
       });
   };
   return (
-    <div className="flex flex-row w-full py-28">
+    <div className="flex flex-row w-full py-4">
       <div className="w-1/2 p-5 max-lg:hidden">
         <img src={login_image} className="max-w-md" />
       </div>

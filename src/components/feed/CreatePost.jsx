@@ -6,9 +6,7 @@ import KeywordInput from "./keywordInput";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const CreatePost = ({ fetchFeed }) => {
-  const [showModal, setShowModal] = useState(false);
-
+const CreatePost = ({ fetchFeed, onClose }) => {
   const [feedData, setFeedData] = useState({
     subject: "",
     body: "",
@@ -20,6 +18,9 @@ const CreatePost = ({ fetchFeed }) => {
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Check if body is empty
     if (feedData.body.length === 0) {
       toast.error("Body cannot be empty", {
         position: "bottom-center",
@@ -31,9 +32,11 @@ const CreatePost = ({ fetchFeed }) => {
         progress: undefined,
         theme: "light",
       });
+      return;
     }
-    if (feedData.subject.length === 0) {
-      // setError("");
+
+    // Fix the keyword validation
+    if (!feedData.subject || feedData.subject.trim().length === 0) {
       toast.error("Please add at least one keyword", {
         position: "bottom-center",
         autoClose: 5000,
@@ -50,16 +53,17 @@ const CreatePost = ({ fetchFeed }) => {
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
       navigate("/auth");
+      return;
     }
 
     const data = {
       subject: feedData.subject,
       body: feedData.body,
-      images: feedData.images.split(";"),
+      images: feedData.images.split(";").filter((img) => img.trim() !== ""),
       isPublic: !feedData.connectionOnly,
     };
 
-    console.log(data);
+    console.log("Submitting data:", data);
 
     axios
       .post(ApiConfig.feed + "/", data, {
@@ -69,182 +73,162 @@ const CreatePost = ({ fetchFeed }) => {
       })
       .then((res) => {
         console.log(res);
-        setShowModal(false);
-        setFeedData({
-          subject: "",
-          body: "",
-          images: "",
-          connectionOnly: false,
-          charCount: 0,
+        toast.success("Post created successfully!", {
+          position: "bottom-center",
+          autoClose: 3000,
+          theme: "light",
         });
 
+        handleClose();
         fetchFeed({ next: null });
       })
       .catch((err) => {
         console.log(err);
+        toast.error("Failed to create post. Please try again.", {
+          position: "bottom-center",
+          autoClose: 5000,
+          theme: "light",
+        });
       });
+  };
+
+  const handleClose = () => {
+    setFeedData({
+      subject: "",
+      body: "",
+      images: "",
+      connectionOnly: false,
+      charCount: 0,
+    });
+    onClose();
   };
 
   return (
     <>
-      <div className="w-full h-[6rem] my-3 flex justify-center items-center border-b-2 border-gray">
+      {/* Modal Background */}
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+        onClick={handleClose}
+      >
+        {/* Modal Content */}
         <div
-          className="w-[90%] h-[4rem] flex justify-start gap-x-3 items-center rounded-[4rem] bg-white border-[#bc383e] border-2 hover:cursor-pointer hover:text-white transition-all duration-300 hover:bg-[#f4f2ee]"
-          onClick={() => {
-            document.title = "Write Post | MMCOE Alumni Portal";
-            setShowModal(true);
-          }}
+          className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
         >
-          <div className="border-[#bc383e] border-2 ml-2 flex justify-center items-center rounded-[2rem] w-[3rem] h-[3rem] ">
-            <i
-              className="fa-solid fa-plus fa-xl"
-              style={{ color: "#bc383e" }}
-            ></i>
-          </div>
-          <button className="">
-            <p className="text-xl text-[#bc383e] tracking-wider">
-              What is happening?!
-            </p>
-          </button>
-        </div>
-        {showModal ? (
-          <>
-            <div
-              className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex flex-col items-center justify-center z-50"
-              onClick={() => {
-                document.title = "Feed | MMCOE Alumni Portal";
-                setShowModal(false);
-              }}
+          {/* Modal Header */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <h3 className="text-xl font-semibold text-gray-900">Create Post</h3>
+            <button
+              className="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+              onClick={handleClose}
             >
-              <div
-                className="flex flex-col items-center justify-center gap-y-4 w-[65%] h-[95%] bg-white border border-gray rounded-lg shadow-sm drop-shadow-sm z-60"
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-              >
-                <div className="flex items-center justify-between w-full p-5 border-b border-solid border-gray-300 rounded-t ">
-                  <h3 className="text-2xl font=semibold">Create Post</h3>
-                  <button
-                    className="bg-transparent border-0 text-black float-right"
-                    onClick={() => setShowModal(false)}
-                  >
-                    <span className="text-black opacity-7 h-6 w-6 text-xl block bg-gray-400 py-0 rounded-full">
-                      <i className="fa-solid fa-xmark"></i>
-                    </span>
-                  </button>
-                </div>
-                <div className="flex flex-col w-full bg-white outline-none focus:outline-none overflow-y-scroll p-4">
-                  <div className="">
-                    <form
-                      className="rounded w-full flex flex-col"
-                      onSubmit={handleSubmit}
-                    >
-                      <textarea
-                        name=""
-                        id=""
-                        cols="20"
-                        rows="10"
-                        className="rounded w-full border border-gray outline-gray justify-center items-center p-4"
-                        placeholder="Share your thoughts..."
-                        value={feedData.body}
-                        onChange={(e) => {
-                          if (e.target.value.length > 3600) {
-                            return;
-                          }
-                          setFeedData({
-                            ...feedData,
-                            body: e.target.value,
-                            charCount: e.target.value.length,
-                          });
-                        }}
-                      ></textarea>
-                      <div className="flex flex-col justify-between p-4">
-                        <p className="text-sm">Add Images</p>
-                        <KeywordInput
-                          value={feedData.images}
-                          setValue={(e) => {
-                            setFeedData({
-                              ...feedData,
-                              images: e,
-                            });
-                          }}
-                          flex={"col"}
-                          itemsAlignment={"start"}
-                          links={true}
-                          placeholder={
-                            "Type and press Enter to add image links..."
-                          }
-                        />
-                      </div>
-                      <div className="flex flex-col justify-between p-4">
-                        <p className="text-sm">Add Keywords</p>
-                        <KeywordInput
-                          value={feedData.subject}
-                          setValue={(e) => {
-                            setFeedData({ ...feedData, subject: e });
-                          }}
-                          flex={"wrap"}
-                          itemsAlignment={"center"}
-                          links={false}
-                          placeholder={
-                            "Type and press Enter to add keywords..."
-                          }
-                        />
-                      </div>
-                      <div className="flex justify-between items-center p-2 ml-2">
-                        <div className="flex justify-start items-center gap-x-2">
-                          <input
-                            type="checkbox"
-                            name=""
-                            id=""
-                            className="w-5 h-5"
-                            checked={feedData.connectionOnly}
-                            onChange={(e) => {
-                              setFeedData({
-                                ...feedData,
-                                connectionOnly: e.target.checked,
-                              });
-                            }}
-                          />
-                          <p className="text-sm">Connection-Only</p>
-                        </div>
-                        <p className="text-sm">
-                          {feedData.charCount}/3600 Characters
-                        </p>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-                <div className="flex items-center justify-end w-full border border-gray p-6 rounded-b">
-                  <button
-                    className="background-transparent uppercase px-6 py-2 text-lg outline-none focus:outline-none mr-1 mb-1 hover:bg-[#f4f2ee] transition-all duration-300 ease-in-out"
-                    type="button"
-                    onClick={() => {
-                      document.title = "Feed | MMCOE Alumni Portal";
-                      setShowModal(false);
+              <i className="fas fa-times text-lg"></i>
+            </button>
+          </div>
+
+          {/* Modal Body */}
+          <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              {/* Post Content */}
+              <div>
+                <textarea
+                  className="w-full p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows="6"
+                  placeholder="Share your thoughts..."
+                  value={feedData.body}
+                  onChange={(e) => {
+                    if (e.target.value.length > 3600) return;
+                    setFeedData({
+                      ...feedData,
+                      body: e.target.value,
+                      charCount: e.target.value.length,
+                    });
+                  }}
+                />
+              </div>
+
+              {/* Add Images */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Add Images
+                </label>
+                <KeywordInput
+                  value={feedData.images}
+                  setValue={(e) => {
+                    setFeedData({
+                      ...feedData,
+                      images: e,
+                    });
+                  }}
+                  flex={"col"}
+                  itemsAlignment={"start"}
+                  links={true}
+                  placeholder={"Type and press Enter to add image links..."}
+                />
+              </div>
+
+              {/* Add Keywords */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Add Keywords
+                </label>
+                <KeywordInput
+                  value={feedData.subject}
+                  setValue={(e) => {
+                    setFeedData({ ...feedData, subject: e });
+                  }}
+                  flex={"wrap"}
+                  itemsAlignment={"center"}
+                  links={false}
+                  placeholder={"Type and press Enter to add keywords..."}
+                />
+              </div>
+
+              {/* Post Options */}
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="connectionOnly"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                    checked={feedData.connectionOnly}
+                    onChange={(e) => {
                       setFeedData({
-                        subject: "",
-                        body: "",
-                        images: "",
-                        connectionOnly: false,
-                        charCount: 0,
+                        ...feedData,
+                        connectionOnly: e.target.checked,
                       });
                     }}
+                  />
+                  <label
+                    htmlFor="connectionOnly"
+                    className="text-sm text-gray-700"
                   >
-                    Cancel
-                  </button>
-                  <button
-                    className="bg-primary text-white px-6 py-2 uppercase text-lg rounded border border-gray shadow-sm hover:shadow-lg hover:bg-[#f4f2ee] hover:text-primary transition-all duration-300 ease-in-out"
-                    type="button"
-                    onClick={handleSubmit}
-                  >
-                    Post
-                  </button>
+                    Connection-Only
+                  </label>
                 </div>
+                <span className="text-sm text-gray-500">
+                  {feedData.charCount}/3600 Characters
+                </span>
               </div>
-            </div>
-          </>
-        ) : null}
+            </form>
+          </div>
+
+          {/* Modal Footer */}
+          <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
+            <button
+              className="px-6 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200"
+              onClick={handleClose}
+            >
+              Cancel
+            </button>
+            <button
+              className="px-6 py-2 text-gray-600 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors duration-200"
+              onClick={handleSubmit}
+            >
+              Post
+            </button>
+          </div>
+        </div>
       </div>
       <ToastContainer />
     </>

@@ -192,7 +192,7 @@ export default function Register() {
   };
 
   return (
-    <div className="flex flex-row w-full py-28">
+    <div className="flex flex-row w-full py-4">
       {page != 0 ? (
         <div>
           <button className="self-start ml-4" onClick={handleBack}>

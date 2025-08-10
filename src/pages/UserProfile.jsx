@@ -11,7 +11,7 @@ import { ToastContainer, toast } from "react-toastify";
 export default function UserProfile() {
   const [user, setUser] = useState({});
   const [updateUser, setUpdateUser] = useState({});
-
+  const [showContactModal, setShowContactModal] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showExperienceModal, setShowExperienceModal] = useState(false);
@@ -230,38 +230,63 @@ export default function UserProfile() {
       });
   };
 
+  // const fetchCities = async ({ search = "" }) => {
+  //   const accessToken = localStorage.getItem("accessToken");
+  //   if (accessToken === null) {
+  //     navigate("/login");
+  //   }
+  //   if (search != "") {
+  //     axios
+  //       .get(ApiConfig.cities + "?search=" + search, {
+  //         headers: {
+  //           Authorization: `Bearer ${accessToken}`,
+  //         },
+  //       })
+  //       .then((res) => {
+  //         setCities(res.data);
+  //       })
+  //       .catch((err) => {
+  //         console.log(err);
+  //       });
+  //     return;
+  //   }
+  //   axios
+  //     .get(ApiConfig.cities, {
+  //       headers: {
+  //         Authorization: `Bearer ${accessToken}`,
+  //       },
+  //     })
+  //     .then((res) => {
+  //       setCities(res.data);
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //     });
+  // };
+
   const fetchCities = async ({ search = "" }) => {
     const accessToken = localStorage.getItem("accessToken");
     if (accessToken === null) {
       navigate("/login");
     }
-    if (search != "") {
-      axios
-        .get(ApiConfig.cities + "?search=" + search, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        })
-        .then((res) => {
-          setCities(res.data);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-      return;
-    }
-    axios
-      .get(ApiConfig.cities, {
+
+    try {
+      let url = ApiConfig.cities;
+      if (search !== "") {
+        url = `${ApiConfig.cities}?search=${search}`;
+      }
+
+      const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      })
-      .then((res) => {
-        setCities(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
       });
+      console.log("city response + ", response.data);
+      setCities(response.data.results || response.data);
+    } catch (err) {
+      console.log(err);
+      setCities([]);
+    }
   };
 
   const fetchSkills = async ({ search = "" }) => {
@@ -466,428 +491,669 @@ export default function UserProfile() {
     <>
       <ToastContainer />
       <div className="flex bg-[#f4f2ee] justify-center flex-col md:items-start items-center md:flex-row md:gap-x-4 lg:w-full lg:gap-x-4">
-        <div className="flex flex-col md:pl-8 w-3/4 max-w-4xl lg:w-3/4">
-          <div className="profile-card flex flex-col items-start px-6 rounded-lg bg-white mt-8 mb-2 shadow-sm drop-shadow-sm h-fit pt-16 pb-8 border border-gray">
-            <button
-              className="py-4 absolute top-0 right-5"
-              onClick={() => {
-                document.title = "Edit Profile | MMCOE Alumni Portal";
-                setShowProfileModal(true);
-              }}
-            >
-              <i className="fas fa-edit text-2xl"></i>
-            </button>
-            <div className="profile-pic flex justify-center items-center mb-4">
-              {user.profilePicture != null ? (
-                <img
-                  src={user.profilePicture}
-                  alt=""
-                  className="w-36 h-36 rounded-full border-4 border-black"
-                />
-              ) : (
-                <i className="fas fa-user-circle text-9xl"></i>
-              )}
-            </div>
-            <div className="profile-name w-full">
-              <h1 className="text-3xl font-bold mb-1">
-                {user.firstName} {user.lastName}
-              </h1>
-            </div>
-            {user.bio && (
-              <div className="profile-department w-full">
-                <p className="text-lg text-left font-thin">{user.bio}</p>
-              </div>
-            )}
-            <div className="profile-department w-full">
-              <p className="text-md text-left font-medium">
-                {DEPARTMENTS[user.department]}
-              </p>
-            </div>
-            <div className="city w-full">
-              <p className="text-md text-left font-medium">
-                {user.cityName && `${user.cityName} - `}
-                <span className="text-blue hover:cursor-pointer hover:border-b-2">
-                  Contact info
-                </span>
-              </p>
-            </div>
-            <div className="profile-bio flex flex-col pt-4">
-              <span className="text-blue hover:cursor-pointer hover:border-b-2">
-                {user.connections} connections
-                {/* TODO: Add clickable box */}
-              </span>
-            </div>
-          </div>
-          <div className="analytics rounded-t-lg flex gap-y-2 flex-col shadow-sm drop-shadow-sm border border-gray bg-white pl-4 py-4">
-            <div className="flex flex-col">
-              <p className="font-semibold text-xl">Analytics</p>
-              <div className="flex flex-row gap-x-1 items-center">
-                <i className="fas fa-eye text-sm"></i>
-                <p className="font-md text-md text-gray">Private to you</p>
-              </div>
-            </div>
-            <div className="flex flex-row pt-4 justify-evenly">
-              {analytics["total"]["profile visit"] != null ? (
-                <div className="flex flex-row">
-                  <i className="fas fa-user-friends text-lg pl-2"></i>
-                  <p className="text-md font-medium px-4">
-                    {analytics["total"]["profile visit"]} profile views
-                  </p>
-                </div>
-              ) : (
-                <div className="flex flex-row">
-                  <i className="fas fa-user-friends text-lg pl-2"></i>
-                  <p className="text-md font-medium px-4">0 profile views</p>
-                </div>
-              )}
-              {analytics.total.feedImpressions != null ? (
-                <div className="flex flex-row">
-                  <i
-                    className="fas fa-line-chart text-lg pl-2"
-                    aria-hidden="true"
-                  ></i>
-                  <p className="text-md font-medium px-4">
-                    {analytics.total.feedImpressions} post impressions
-                  </p>
-                </div>
-              ) : (
-                <div className="flex flex-row">
-                  <i
-                    className="fas fa-line-chart text-lg pl-2"
-                    aria-hidden="true"
-                  ></i>
-                  <p className="text-md font-medium px-4">0 post impressions</p>
-                </div>
-              )}
-              {analytics.total.search != null ? (
-                <div className="flex flex-row">
-                  <i className="fas fa-search text-lg pl-2"></i>
-                  <p className="text-md font-medium px-4">
-                    {analytics.total.search} search appearances
-                  </p>
-                </div>
-              ) : (
-                <div className="flex flex-row">
-                  <i className="fas fa-search text-lg pl-2"></i>
-                  <p className="text-md font-medium px-4">
-                    0 search appearances
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="w-full rounded-b-lg text-center py-2 shadow-sm drop-shadow-sm border border-gray hover:cursor-pointer bg-white hover:bg-[#ebebebeb]">
-            <p className="text-blue font-medium">Show All analytics</p>
-          </div>
-
-          <div className="About rounded-lg flex gap-y-2 mt-2 flex-col shadow-sm drop-shadow-sm border border-gray bg-white pl-4 py-4">
-            <p className="font-semibold text-xl">Bio</p>
-            {user.bio ? <p>{user.bio}</p> : <p>No Bio Found</p>}
-          </div>
-
-          {user.resume && (
-            <div className="About rounded-lg flex gap-y-2 mt-2 flex-col shadow-sm drop-shadow-sm border border-gray bg-white pl-4 py-4">
-              <p className="font-semibold text-xl">Resume</p>
+        <div className="flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Profile Header Card */}
+          <div className="relative bg-white rounded-2xl shadow-lg overflow-hidden mt-6 mb-6">
+            {/* Cover Photo Section */}
+            <div className="h-32 sm:h-40 lg:h-48 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 relative">
+              <div className="absolute inset-0 bg-black bg-opacity-20"></div>
               <button
-                className="bg-[#ebebebeb] border border-gray text-black font-bold py-2 px-4 rounded-lg mr-4 hover:bg-primary hover:text-white transition-all duration-300"
+                className="absolute top-4 right-4 bg-white bg-opacity-90 backdrop-blur-sm p-2 rounded-full shadow-md hover:bg-white hover:shadow-lg transition-all duration-300 group"
                 onClick={() => {
-                  window.open(user.resume, "_blank");
+                  document.title = "Edit Profile | MMCOE Alumni Portal";
+                  setShowProfileModal(true);
                 }}
               >
-                View
+                <i className="fas fa-edit text-gray-700 group-hover:text-blue-600 transition-colors duration-300"></i>
               </button>
             </div>
-          )}
 
-          <div className="Activity rounded-lg flex gap-y-2 flex-col mt-2 shadow-sm drop-shadow-sm border border-gray bg-white pt-4">
-            <p className="font-semibold text-xl pl-4">Activity</p>
-            {userActivity.results &&
-              userActivity.results.map((act, index) => {
-                if (act.type == "feed") {
-                  return (
-                    <div
-                      className="flex flex-col cursor-pointer pl-4"
-                      key={act.id}
-                      onClick={() => {
-                        navigate("/feed/" + act.data.id);
-                      }}
-                    >
-                      <p className="text-sm pb-1">
-                        {user.firstName + " " + user.lastName}
-                        {" posted"} {" - "}
-                        <span className="text text-gray-400 font-thin">
-                          {formatDate(act.data.createdAt)}
-                        </span>
-                      </p>
-                      <div className="flex flex-row">
-                        <div className="w-[80px] h-[80px] rounded-sm">
-                          {act.data.images &&
-                            act.data.images[0] &&
-                            act.data.images[0].image == "" && (
-                              <div className="max-w-[100px] h-[80px] w-[80px] rounded-lg border flex flex-col justify-center items-center">
-                                <i className="fa fa-file-text text-2xl"></i>
-                              </div>
-                            )}
-                          {act.data.images &&
-                            act.data.images[0] &&
-                            act.data.images[0].image != "" && (
-                              <img
-                                src={act.data.images[0].image || ""}
-                                alt=""
-                                className="max-w-[100px] h-[80px] w-[80px] rounded-lg"
-                              />
-                            )}
-                          {!act.data.images[0] && (
-                            <div className="max-w-[100px] h-[80px] w-[80px] rounded-lg border flex flex-col justify-center items-center">
-                              <i className="fa fa-file-text text-2xl"></i>
-                            </div>
-                          )}
-                        </div>
-                        <div className="ml-5 pr-2">
-                          <span className="text-sm font-thin">
-                            #
-                            {act.data.subject
-                              .split(";")
-                              .slice(0, 3)
-                              .join(", #")}
-                          </span>
-                          <pre className="text-sm">
-                            <span
-                              className="inner-pre"
-                              style={{ fontFamily: "Verdana" }}
-                            >
-                              {act.data.body.slice(0, 50) + "..."}
-                            </span>
-                          </pre>
-                        </div>
+            {/* Profile Content */}
+            <div className="relative px-6 sm:px-8 pb-8">
+              {/* Profile Picture */}
+              <div className="flex flex-col sm:flex-row items-center sm:items-end -mt-16 sm:-mt-20 mb-6">
+                <div className="relative group">
+                  <div className="w-32 h-32 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full border-4 border-white bg-white shadow-xl overflow-hidden">
+                    {user.profilePicture ? (
+                      <img
+                        src={user.profilePicture}
+                        alt={`${user.firstName} ${user.lastName}`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                        <i className="fas fa-user text-4xl sm:text-5xl lg:text-6xl text-gray-500"></i>
                       </div>
-                      <div className="flex flex-row gap-x-2 mt-2 pl-1">
-                        <p className="text-sm pb-1 text-blue">
-                          <i className="fa fa-arrow-up"></i>{" "}
-                          {act.data.likesCount}
-                        </p>
-                        <p className="text-sm pb-1 text-blue">
-                          <i className="fa fa-comment-o"></i>{" "}
-                          {act.data.commentsCount}
-                        </p>
-                        <p className="text-sm pb-1 text-blue">
-                          <i className="fa fa-share"></i> {act.data.sharesCount}
-                        </p>
-                      </div>
-                      {index != userActivity.results.length - 1 && (
-                        <hr className="w-11/12 h-[1px] border-gray mt-4" />
-                      )}
+                    )}
+                  </div>
+
+                  {/* Profile Picture Edit Overlay */}
+                  <div
+                    className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer"
+                    onClick={() => setShowProfileModal(true)}
+                  >
+                    <i className="fas fa-camera text-white text-xl"></i>
+                  </div>
+                </div>
+
+                {/* Action Buttons - Mobile and Desktop */}
+                <div className="flex flex-wrap gap-3 mt-4 sm:mt-0 sm:ml-auto">
+                  {/* <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-gray-500 border border-black px-4 py-2 rounded-full font-medium shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                    <i className="fas fa-plus text-sm"></i>
+                    <span className="hidden sm:inline">Connect</span>
+                  </button>
+                  <button className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 px-4 py-2 rounded-full font-medium shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                    <i className="fas fa-envelope text-sm"></i>
+                    <span className="hidden sm:inline">Message</span>
+                  </button> */}
+                  <button
+                    onClick={() => {
+                      document.title = "Edit Profile | MMCOE Alumni Portal";
+                      setShowProfileModal(true);
+                    }}
+                    className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 px-4 py-2 rounded-full font-medium shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                  >
+                    <i className="fas fa-ellipsis-h text-sm"></i>
+                  </button>
+                </div>
+              </div>
+
+              {/* User Information */}
+              <div className="text-center sm:text-left">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+                  {user.firstName} {user.lastName}
+                </h1>
+
+                {user.bio && (
+                  <p className="text-gray-600 text-base sm:text-lg leading-relaxed mb-3 max-w-2xl">
+                    {user.bio}
+                  </p>
+                )}
+
+                {/* Professional Info */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-gray-600 mb-4">
+                  {user.department && (
+                    <div className="flex items-center justify-center sm:justify-start gap-2">
+                      <i className="fas fa-graduation-cap text-blue-500"></i>
+                      <span className="font-medium">
+                        {DEPARTMENTS[user.department]}
+                      </span>
                     </div>
-                  );
-                } else {
-                  return (
-                    <div
-                      className="flex flex-col cursor-pointer pl-4"
-                      key={act.id}
-                      onClick={() => {
-                        navigate("/feed/" + act.data.feed);
-                      }}
-                    >
-                      <p className="text-sm pb-1">
-                        {user.firstName + " " + user.lastName}{" "}
-                        {act.data.action == "LIKE" && "liked"}{" "}
-                        {act.data.action == "COMMENT" && "commented on"}{" "}
-                        {act.data.action == "SHARE" && "shared"} {" - "}
-                        <span className="text text-gray-400 font-thin">
-                          {formatDate(act.data.createdAt)}
-                        </span>
-                      </p>
-                      <div className="flex flex-row">
-                        <div className="max-w-[100px] h-[80px] w-[80px] rounded-lg border flex flex-col justify-center items-center">
-                          {act.data.action == "LIKE" && (
-                            <i className="fa fa-arrow-up text-2xl"></i>
-                          )}
-                          {act.data.action == "COMMENT" && (
-                            <i className="fa fa-commenting-o text-2xl"></i>
-                          )}
-                        </div>
-                        <div className="ml-5">
-                          <span className="text-sm font-thin">
-                            #
-                            {act.data.feedName
-                              .split(";")
-                              .slice(0, 3)
-                              .join(", #")}
-                          </span>
-                          <pre className="text-sm">
-                            <span
-                              className="inner-pre"
-                              style={{ fontFamily: "Verdana" }}
-                            >
-                              {act.data.feedBody.slice(0, 50) + "..."}
-                            </span>
-                          </pre>
-                        </div>
-                      </div>
-                      {index != userActivity.results.length - 1 && (
-                        <hr className="w-11/12 h-[1px] border-gray mt-4" />
-                      )}
+                  )}
+
+                  {user.cityName && (
+                    <div className="flex items-center justify-center sm:justify-start gap-2">
+                      <i className="fas fa-map-marker-alt text-red-500"></i>
+                      <span>{user.cityName}</span>
                     </div>
-                  );
-                }
-              })}
-            {userActivity.next && (
-              <p
-                className="text-center mt-2 pt-2 pb-2 cursor-pointer border-t border-gray hover:bg-[#ebebebeb]"
-                onClick={() => {
-                  fetchUserActivity({ next: userActivity.next });
-                }}
-              >
-                Load More
-              </p>
-            )}
-            {userActivity.next == null && <p className="text-center mt-2"></p>}
+                  )}
+                </div>
+
+                {/* Contact Info and Connections */}
+                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 text-sm">
+                  <button
+                    className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors duration-300"
+                    onClick={() => setShowContactModal(true)}
+                  >
+                    <i className="fas fa-info-circle mr-1"></i>
+                    Contact info
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500">•</span>
+                    <button className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors duration-300">
+                      <i className="fas fa-users mr-1"></i>
+                      {user.connections || 0} connections
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="Experience rounded-lg flex gap-y-2 mt-2 flex-col shadow-sm drop-shadow-sm border border-gray bg-white pt-4">
-            <div className="flex flex-row justify-between">
-              <p className="font-semibold text-xl pl-4">Experience</p>
-              <div className="py-4 absolute top-0 right-5 flex flex-row gap-x-8">
+
+          {/* Analytics Card */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                Analytics
+              </h2>
+              <div className="flex items-center gap-2 text-gray-500">
+                <i className="fas fa-eye text-sm"></i>
+                <span className="text-sm">Private to you</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Profile Views */}
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200 hover:shadow-md transition-all duration-300 transform hover:scale-105">
+                <div className="flex items-center mb-3">
+                  <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mr-4">
+                    <i className="fas fa-eye text-white text-lg"></i>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">
+                      Profile Views
+                    </h3>
+                    <p className="text-xs text-gray-600">Last 90 days</p>
+                  </div>
+                </div>
+                <p className="text-2xl sm:text-3xl font-bold text-blue-600">
+                  {analytics?.total?.["profile visit"] || 0}
+                </p>
+              </div>
+
+              {/* Post Impressions */}
+              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200 hover:shadow-md transition-all duration-300 transform hover:scale-105">
+                <div className="flex items-center mb-3">
+                  <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mr-4">
+                    <i className="fas fa-chart-line text-white text-lg"></i>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">
+                      Post Impressions
+                    </h3>
+                    <p className="text-xs text-gray-600">Last 90 days</p>
+                  </div>
+                </div>
+                <p className="text-2xl sm:text-3xl font-bold text-green-600">
+                  {analytics?.total?.feedImpressions || 0}
+                </p>
+              </div>
+
+              {/* Search Appearances */}
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200 hover:shadow-md transition-all duration-300 transform hover:scale-105 sm:col-span-2 lg:col-span-1">
+                <div className="flex items-center mb-3">
+                  <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mr-4">
+                    <i className="fas fa-search text-white text-lg"></i>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">
+                      Search Appearances
+                    </h3>
+                    <p className="text-xs text-gray-600">Last 90 days</p>
+                  </div>
+                </div>
+                <p className="text-2xl sm:text-3xl font-bold text-purple-600">
+                  {analytics?.total?.search || 0}
+                </p>
+              </div>
+            </div>
+
+            <button className="w-full mt-6 py-3 text-blue-600 font-medium hover:bg-blue-50 rounded-xl transition-colors duration-300 border border-blue-200 hover:border-blue-300">
+              Show all analytics
+              <i className="fas fa-arrow-right ml-2"></i>
+            </button>
+          </div>
+
+          {/* About Section */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                About
+              </h2>
+              <button
+                className="text-gray-500 hover:text-blue-600 transition-colors duration-300"
+                onClick={() => setShowProfileModal(true)}
+              >
+                <i className="fas fa-edit text-lg"></i>
+              </button>
+            </div>
+
+            <div className="prose max-w-none">
+              {user.bio ? (
+                <p className="text-gray-700 leading-relaxed">{user.bio}</p>
+              ) : (
+                <div className="text-center py-8">
+                  <i className="fas fa-user-edit text-4xl text-gray-300 mb-4"></i>
+                  <p className="text-gray-500 mb-4">
+                    Share something about yourself
+                  </p>
+                  <button
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-300"
+                    onClick={() => setShowProfileModal(true)}
+                  >
+                    Add Bio
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Resume Section */}
+          {user.resume && (
+            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                  Resume
+                </h2>
+              </div>
+
+              <div className="flex items-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-300">
+                <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mr-4">
+                  <i className="fas fa-file-pdf text-white text-lg"></i>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900">Resume.pdf</h3>
+                  <p className="text-sm text-gray-600">
+                    Click to view or download
+                  </p>
+                </div>
                 <button
-                  onClick={() => {
-                    document.title = "Add Experience | MMCOE Alumni Portal";
-                    setShowExperienceModal(true);
-                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105"
+                  onClick={() => window.open(user.resume, "_blank")}
                 >
-                  <i className="fas fa-plus text-2xl"></i>
+                  <i className="fas fa-external-link-alt mr-2"></i>
+                  View
                 </button>
               </div>
             </div>
-            {userExperience.results &&
-              userExperience.results.map((exp, index) => (
-                <div
-                  className={`flex flex-col pl-4 ${
-                    index == userExperience.results.length - 1 && "mb-4"
-                  }`}
-                >
+          )}
+
+          {/* Activity Section */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                Recent Activity
+              </h2>
+              <span className="text-sm text-gray-500">
+                {userActivity?.results?.length || 0} activities
+              </span>
+            </div>
+
+            <div className="space-y-4">
+              {userActivity.results && userActivity.results.length > 0 ? (
+                userActivity.results.slice(0, 3).map((act, index) => (
                   <div
-                    className="flex flex-row justify-left gap-x-2 mt-2 cursor-pointer w-full"
+                    key={act.id}
+                    className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 cursor-pointer transition-all duration-300 group"
+                    onClick={() =>
+                      navigate(
+                        act.type === "feed"
+                          ? `/feed/${act.data.id}`
+                          : `/feed/${act.data.feed}`
+                      )
+                    }
+                  >
+                    <div className="flex-shrink-0">
+                      {act.type === "feed" ? (
+                        <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                          <i className="fas fa-pen text-white"></i>
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+                          <i
+                            className={`fas ${
+                              act.data.action === "LIKE"
+                                ? "fa-thumbs-up"
+                                : act.data.action === "COMMENT"
+                                ? "fa-comment"
+                                : "fa-share"
+                            } text-white`}
+                          ></i>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <p className="text-sm font-medium text-gray-900">
+                          {user.firstName} {user.lastName}
+                        </p>
+                        <span className="text-sm text-gray-500">
+                          {act.type === "feed"
+                            ? "posted"
+                            : act.data.action === "LIKE"
+                            ? "liked"
+                            : act.data.action === "COMMENT"
+                            ? "commented on"
+                            : "shared"}
+                        </span>
+                        <span className="text-sm text-gray-400">
+                          •{" "}
+                          {formatDate(
+                            act.type === "feed"
+                              ? act.data.createdAt
+                              : act.data.createdAt
+                          )}
+                        </span>
+                      </div>
+
+                      <h3 className="font-medium text-gray-900 mb-1 group-hover:text-blue-600 transition-colors duration-300">
+                        #
+                        {act.type === "feed"
+                          ? act.data.subject.split(";").slice(0, 3).join(", #")
+                          : act.data.feedName
+                              .split(";")
+                              .slice(0, 3)
+                              .join(", #")}
+                      </h3>
+
+                      <p className="text-gray-600 text-sm line-clamp-2">
+                        {act.type === "feed"
+                          ? act.data.body.slice(0, 100) +
+                            (act.data.body.length > 100 ? "..." : "")
+                          : act.data.feedBody.slice(0, 100) +
+                            (act.data.feedBody.length > 100 ? "..." : "")}
+                      </p>
+
+                      <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <i className="fas fa-thumbs-up"></i>
+                          {act.type === "feed"
+                            ? act.data.likesCount
+                            : act.data.feedLikesCount}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <i className="fas fa-comment"></i>
+                          {act.type === "feed"
+                            ? act.data.commentsCount
+                            : act.data.feedCommentsCount}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <i className="fas fa-share"></i>
+                          {act.type === "feed" ? act.data.sharesCount : 0}
+                        </span>
+                      </div>
+                    </div>
+
+                    {act.type === "feed" && act.data.images?.[0]?.image && (
+                      <div className="flex-shrink-0">
+                        <img
+                          src={act.data.images[0].image}
+                          alt="Post"
+                          className="w-16 h-16 object-cover rounded-lg"
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <i className="fas fa-chart-line text-4xl text-gray-300 mb-4"></i>
+                  <p className="text-gray-500 mb-4">No recent activity</p>
+                  <p className="text-sm text-gray-400">
+                    Start posting to see your activity here
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {userActivity.next && (
+              <button
+                className="w-full mt-6 py-3 text-blue-600 font-medium hover:bg-blue-50 rounded-xl transition-colors duration-300 border border-blue-200 hover:border-blue-300"
+                onClick={() => fetchUserActivity({ next: userActivity.next })}
+              >
+                Load more activity
+                <i className="fas fa-arrow-down ml-2"></i>
+              </button>
+            )}
+          </div>
+
+          {/* Experience Section */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                Experience
+              </h2>
+              <button
+                className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-all duration-300 transform hover:scale-105"
+                onClick={() => {
+                  document.title = "Add Experience | MMCOE Alumni Portal";
+                  setShowExperienceModal(true);
+                }}
+              >
+                <i className="fas fa-plus"></i>
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {userExperience.results && userExperience.results.length > 0 ? (
+                userExperience.results.map((exp, index) => (
+                  <div
                     key={exp.id}
+                    className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 cursor-pointer transition-all duration-300 group"
                     onClick={() => {
                       setShowExperienceEditModal(true);
                       setNewExperienceEdit(exp);
                     }}
                   >
-                    <div className="max-w-[100px] h-[80px] w-[80px] rounded-lg border flex flex-col justify-center items-center">
-                      <i
-                        className="fa fa-briefcase text-2xl transition-all duration-300"
-                        onMouseEnter={(e) => {
-                          e.target.classList.add("fa-edit");
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.classList.remove("fa-edit");
-                        }}
-                      ></i>
+                    <div className="flex-shrink-0">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-md">
+                        <i className="fas fa-briefcase text-white"></i>
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <p className="text-sm font-bold">{exp.designation}</p>
-                      <p className="text-sm font-light">{exp.company}</p>
-                      <p className="text-xs">
-                        {exp.startDate} - {exp.isCurrent && "Present"}
-                        {" (" +
-                          getDuration(exp.startDate, Date.now()) +
-                          " months)"}
-                        {!exp.isCurrent &&
-                          exp.endDate +
-                            " (" +
-                            getDuration(exp.startDate, exp.endDate) +
-                            " months)"}
-                      </p>
-                      <p className="text-sm font-medium">
-                        {exp.description && exp.description.slice(0, 100)}
-                        {exp.description &&
-                          exp.description.length > 100 &&
-                          "..."}
-                      </p>
+
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
+                            {exp.designation}
+                          </h3>
+                          <p className="text-gray-700 font-medium">
+                            {exp.company}
+                          </p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {exp.startDate} -{" "}
+                            {exp.isCurrent ? "Present" : exp.endDate}
+                            <span className="mx-2">•</span>
+                            {exp.isCurrent
+                              ? getDuration(exp.startDate, Date.now())
+                              : getDuration(exp.startDate, exp.endDate)}{" "}
+                            months
+                          </p>
+                          {exp.description && (
+                            <p className="text-gray-600 mt-2 line-clamp-2">
+                              {exp.description.slice(0, 150)}
+                              {exp.description.length > 150 && "..."}
+                            </p>
+                          )}
+                        </div>
+                        <button className="text-gray-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                          <i className="fas fa-edit"></i>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  {index != userExperience.results.length - 1 && (
-                    <hr className="w-11/12 h-[1px] border-gray mt-4" />
-                  )}
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <i className="fas fa-briefcase text-4xl text-gray-300 mb-4"></i>
+                  <p className="text-gray-500 mb-4">No experience added yet</p>
+                  <button
+                    className="bg-blue-600 hover:bg-blue-700 text-gray-500 border border-black px-6 py-2 rounded-lg font-medium transition-colors duration-300"
+                    onClick={() => setShowExperienceModal(true)}
+                  >
+                    Add Experience
+                  </button>
                 </div>
-              ))}
+              )}
+            </div>
+
             {userExperience.next && (
-              <p
-                className="text-center mt-2 pt-2 pb-2 cursor-pointer border-t border-gray hover:bg-[#ebebebeb]"
-                onClick={() => {
-                  fetchUserExperience({ next: userExperience.next });
-                }}
+              <button
+                className="w-full mt-6 py-3 text-blue-600 font-medium hover:bg-blue-50 rounded-xl transition-colors duration-300 border border-blue-200 hover:border-blue-300"
+                onClick={() =>
+                  fetchUserExperience({ next: userExperience.next })
+                }
               >
-                Load More
-              </p>
-            )}
-            {userExperience.count == 0 && (
-              <div className="flex flex-row justify-left gap-x-2 pl-4 py-4">
-                <span>No Experiences Found.</span>
-              </div>
+                Load more experiences
+                <i className="fas fa-arrow-down ml-2"></i>
+              </button>
             )}
           </div>
-          <div className="Skills rounded-lg flex gap-y-2 mt-2 mb-8 flex-col shadow-sm drop-shadow-sm border border-gray bg-white pt-4">
-            <div className="flex flex-row justify-between">
-              <p className="font-semibold text-xl pl-4">Skill</p>
-              <div className="py-4 absolute top-0 right-5 flex flex-row gap-x-8">
-                <button
-                  onClick={() => {
-                    document.title = "Add Skill | MMCOE Alumni Portal";
-                    setShowSkillsModal(true);
-                  }}
-                >
-                  <i className="fas fa-plus text-2xl"></i>
-                </button>
-              </div>
+
+          {/* Skills Section */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                Skills
+              </h2>
+              <button
+                className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-all duration-300 transform hover:scale-105"
+                onClick={() => {
+                  document.title = "Add Skill | MMCOE Alumni Portal";
+                  setShowSkillsModal(true);
+                }}
+              >
+                <i className="fas fa-plus"></i>
+              </button>
             </div>
-            {userSkills.results &&
-              userSkills.results.map((skill, index) => (
-                <div
-                  className={`flex flex-col pl-4 ${
-                    index == userSkills.results.length - 1 && "mb-4"
-                  }`}
-                  onClick={() => {
-                    setShowSkillEditModal(true);
-                    setNewSkillEdit(skill);
-                    setSkillSearch(skill.skillName);
-                  }}
-                >
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {userSkills.results && userSkills.results.length > 0 ? (
+                userSkills.results.map((skill, index) => (
                   <div
-                    className="flex flex-row justify-left items-center gap-x-2 mt-2 cursor-pointer"
                     key={skill.id}
+                    className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-all duration-300 group"
+                    onClick={() => {
+                      setShowSkillEditModal(true);
+                      setNewSkillEdit(skill);
+                      setSkillSearch(skill.skillName);
+                    }}
                   >
-                    <div className="max-w-[100px] h-[80px] w-[80px] rounded-lg border flex flex-col justify-center items-center">
-                      <i className="fa fa-rocket text-2xl"></i>
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <i className="fas fa-star text-white text-sm"></i>
                     </div>
-                    <div className="flex flex-col">
-                      <p className="text-lg font-bold">{skill.skillName}</p>
-                      <p className="text-sm font-light">
+
+                    <div className="flex-1">
+                      <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
+                        {skill.skillName}
+                      </h3>
+                      <p className="text-sm text-gray-500">
                         {EXPERIENCE[skill.experience]}
                       </p>
                     </div>
+
+                    <button className="text-gray-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                      <i className="fas fa-edit text-sm"></i>
+                    </button>
                   </div>
-                  {index != userSkills.results.length - 1 && (
-                    <hr className="w-11/12 h-[1px] border-gray mt-4" />
-                  )}
+                ))
+              ) : (
+                <div className="col-span-full text-center py-12">
+                  <i className="fas fa-star text-4xl text-gray-300 mb-4"></i>
+                  <p className="text-gray-500 mb-4">No skills added yet</p>
+                  <button
+                    className="bg-blue-600 hover:bg-blue-700 text-gray-500 border border-black px-6 py-2 rounded-lg font-medium transition-colors duration-300"
+                    onClick={() => setShowSkillsModal(true)}
+                  >
+                    Add Skills
+                  </button>
                 </div>
-              ))}
+              )}
+            </div>
+
             {userSkills.next && (
-              <p
-                className="text-center mt-2 pt-2 pb-2 cursor-pointer border-t border-gray hover:bg-[#ebebebeb]"
-                onClick={() => {
-                  fetchUserSkills({ next: userSkills.next });
-                }}
+              <button
+                className="w-full mt-6 py-3 text-blue-600 font-medium hover:bg-blue-50 rounded-xl transition-colors duration-300 border border-blue-200 hover:border-blue-300"
+                onClick={() => fetchUserSkills({ next: userSkills.next })}
               >
-                Load More
-              </p>
-            )}
-            {userSkills.count == 0 && (
-              <div className="flex flex-row justify-left gap-x-2 pl-4 py-4">
-                <span>No Skills Found.</span>
-              </div>
+                Load more skills
+                <i className="fas fa-arrow-down ml-2"></i>
+              </button>
             )}
           </div>
         </div>
+
+        {/* Contact Info Modal */}
+        {showContactModal && (
+          <div
+            className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex flex-col items-center justify-center z-50"
+            onClick={() => setShowContactModal(false)}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md mx-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Contact Information
+                </h3>
+                <button
+                  className="text-gray-500 hover:text-gray-700 transition-colors duration-300"
+                  onClick={() => setShowContactModal(false)}
+                >
+                  <i className="fas fa-times text-xl"></i>
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Name */}
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i className="fas fa-user text-blue-600"></i>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Full Name</p>
+                    <p className="font-semibold text-gray-900">
+                      {user.firstName} {user.lastName}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i className="fas fa-envelope text-green-600"></i>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Email Address</p>
+                    <p className="font-semibold text-gray-900">
+                      {user.email || "Not provided"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Phone */}
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <i className="fas fa-phone text-purple-600"></i>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Phone Number</p>
+                    <p className="font-semibold text-gray-900">
+                      {user.phoneNumber || "Not provided"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Location */}
+                {user.cityName && (
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                      <i className="fas fa-map-marker-alt text-red-600"></i>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Location</p>
+                      <p className="font-semibold text-gray-900">
+                        {user.cityName}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-8 flex gap-3">
+                <button
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-300"
+                  onClick={() => setShowContactModal(false)}
+                >
+                  Close
+                </button>
+                <button
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium transition-colors duration-300"
+                  onClick={() => {
+                    setShowContactModal(false);
+                    setShowProfileModal(true);
+                  }}
+                >
+                  Edit
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col w-1/4 max-w-1/4 md:w-1/4 md:mt-8 md:mr-8">
           {window.innerWidth > 768 && <PeopleRecommendation />}
         </div>
@@ -1235,17 +1501,15 @@ export default function UserProfile() {
                         if (e.target.value.length >= 3) {
                           setIsCityDropdownOpen(true);
                           fetchCities({ search: e.target.value });
-                        }
-                        if (e.target.value.length < 3) {
+                        } else {
                           setIsCityDropdownOpen(false);
+                          setCities([]);
                         }
                       }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
-                          fetchCities({
-                            search: `?search=${citySearch}`,
-                          });
-                          setIsCityDropdownOpen(false);
+                          e.preventDefault();
+                          fetchCities({ search: citySearch });
                         }
                         if (e.key === "Escape") {
                           setIsCityDropdownOpen(false);
@@ -1253,31 +1517,29 @@ export default function UserProfile() {
                       }}
                     />
                     {isCityDropdownOpen && (
-                      <div
-                        className={`absolute flex flex-col w-full max-h-[20rem] items-center justify-center z-30 rounded-b-lg bg-white border border-gray border-t-white overflow-y-scroll`}
-                      >
-                        {cities.length > 0 ? (
-                          cities.map((city) => {
-                            return (
-                              <button
-                                className="w-full h-8 text-sm outline-none z-30 hover:bg-gray"
-                                key={city.id}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setCitySearch(city.name);
-                                  setUpdateUser({
-                                    ...updateUser,
-                                    city: city.id,
-                                  });
-                                  setIsCityDropdownOpen(false);
-                                }}
-                              >
-                                {city.cityName}
-                              </button>
-                            );
-                          })
+                      <div className="absolute flex flex-col w-full max-h-[20rem] items-center justify-center z-30 rounded-b-lg bg-white border border-gray border-t-white overflow-y-scroll">
+                        {cities && cities.length > 0 ? (
+                          cities.map((city) => (
+                            <button
+                              className="w-full h-8 text-sm outline-none z-30 hover:bg-gray px-2 py-1 text-left"
+                              key={city.id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setCitySearch(city.cityName || city.name);
+                                setUpdateUser({
+                                  ...updateUser,
+                                  city: city.id,
+                                });
+                                setIsCityDropdownOpen(false);
+                              }}
+                            >
+                              {city.cityName || city.name}
+                            </button>
+                          ))
                         ) : (
-                          <>No such city.</>
+                          <div className="w-full p-2 text-sm text-gray-500">
+                            No cities found. Try a different search term.
+                          </div>
                         )}
                       </div>
                     )}
@@ -1730,7 +1992,8 @@ export default function UserProfile() {
             }}
           >
             <div className="flex items-center justify-between w-full p-5 border-b border-solid border-gray-300 rounded-t ">
-              <h3 className="text-2xl font=semibold">Add Skills</h3>
+              <h3 className="text-2xl font=semibold text-black">Add Skills</h3>
+
               <button
                 className="bg-transparent border-0 text-black float-right"
                 onClick={() => setShowSkillsModal(false)}

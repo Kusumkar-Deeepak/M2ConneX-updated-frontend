@@ -8,7 +8,93 @@ const PeopleRecommendation = ({ profileUserId, flex = "col" }) => {
   const [people, setPeople] = useState([]);
   const navigate = useNavigate();
 
+  // Temporary raw data for people
+  const tempPeopleData = {
+    results: [
+      {
+        id: 1,
+        firstName: "Sarah",
+        lastName: "Johnson",
+        profilePicture:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ46cUUkMFbahT7-v4_Re_i5JNTqI6j4ptdOQ&s",
+        bio: "Software Engineer passionate about React and Node.js development",
+        cityName: "Mumbai",
+        department: "Computer Engineering",
+        // mutualConnections: [{ id: 1 }, { id: 2 }],
+        // isConnected: "not_connected",
+      },
+      {
+        id: 2,
+        firstName: "Michael",
+        lastName: "Chen",
+        profilePicture:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBvqzyx_zoi6q2c0Gd1XnE7wysD9PGOLe3-A&s",
+        bio: "Data Scientist with expertise in Machine Learning and AI",
+        cityName: "Pune",
+        department: "Information Technology",
+        // mutualConnections: [{ id: 3 }],
+        // isConnected: "not_connected",
+      },
+      {
+        id: 3,
+        firstName: "Emily",
+        lastName: "Rodriguez",
+        profilePicture:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBvqzyx_zoi6q2c0Gd1XnE7wysD9PGOLe3-A&s",
+        bio: "Product Manager focusing on user experience and digital transformation",
+        cityName: "Bangalore",
+        department: "Electronics and Communication",
+        // mutualConnections: [],
+        // isConnected: "not_connected",
+      },
+      {
+        id: 4,
+        firstName: "David",
+        lastName: "Kumar",
+        profilePicture:
+          "https://images.rawpixel.com/image_800/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvcm0zMjgtMzY2LXRvbmctMDhfMS5qcGc.jpg",
+        bio: "DevOps Engineer specializing in cloud infrastructure and automation",
+        cityName: "Hyderabad",
+        department: "Computer Engineering",
+        // mutualConnections: [{ id: 1 }, { id: 2 }, { id: 3 }],
+        // isConnected: "pending",
+      },
+      {
+        id: 5,
+        firstName: "Priya",
+        lastName: "Sharma",
+        profilePicture:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSw6rKo4oAZitzIx6Y6LB5xPtHKNNuatMHTDw&s",
+        bio: "UI/UX Designer creating beautiful and intuitive digital experiences",
+        cityName: "Delhi",
+        department: "Information Technology",
+        // mutualConnections: [{ id: 1 }],
+        // isConnected: "not_connected",
+      },
+      {
+        id: 6,
+        firstName: "Alex",
+        lastName: "Thompson",
+        profilePicture:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSw6rKo4oAZitzIx6Y6LB5xPtHKNNuatMHTDw&s",
+        bio: "Full Stack Developer with passion for modern web technologies",
+        cityName: "Chennai",
+        department: "Computer Engineering",
+        // mutualConnections: [{ id: 2 }, { id: 3 }],
+        // isConnected: "not_connected",
+      },
+    ],
+    next: null,
+    count: 6,
+  };
+
+  console.log("people", people);
+
   useEffect(() => {
+    // Use temporary data instead of API call
+    // setPeople(tempPeopleData);
+
+    // Comment out the API call for now
     fetchPeople({ next: null });
   }, []);
 
@@ -30,6 +116,8 @@ const PeopleRecommendation = ({ profileUserId, flex = "col" }) => {
         })
         .catch((err) => {
           console.log(err);
+          // Fallback to temp data if API fails
+          setPeople(tempPeopleData);
         });
     } else {
       axios
@@ -44,13 +132,25 @@ const PeopleRecommendation = ({ profileUserId, flex = "col" }) => {
         })
         .catch((err) => {
           console.log(err);
+          // Fallback to temp data if API fails
+          setPeople(tempPeopleData);
         });
     }
   };
 
   const handleConnect = (e, person) => {
     e.preventDefault();
-    console.log("Connect");
+    console.log("Connect", person.firstName);
+
+    // For demo purposes, update the local state
+    setPeople((prevPeople) => ({
+      ...prevPeople,
+      results: prevPeople.results.map((p) =>
+        p.id === person.id ? { ...p, isConnected: "pending" } : p
+      ),
+    }));
+
+    // Comment out API call for now
 
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
@@ -80,8 +180,15 @@ const PeopleRecommendation = ({ profileUserId, flex = "col" }) => {
 
   return (
     <div className="suggestions-and-more h-full flex flex-col max-md:w-full max-lg:pb-0 lg:w-full self-start">
-      <div className="suggestions rounded-lg bg-white flex flex-col drop-shadow-sm shadow-sm border border-gray p-6 gap-y-6 w-full h-full lg:w-full">
-        <p className="text-xl">You may also know</p>
+      <div className="suggestions rounded-xl bg-white flex flex-col drop-shadow-sm shadow-sm border border-gray-200 p-6 gap-y-6 w-full h-full lg:w-full">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900">
+            You may also know
+          </h3>
+          <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+            See all
+          </button>
+        </div>
         <div
           className={`flex flex-${flex} w-full h-full ${
             flex == "wrap" && "justify-start items-start"
@@ -90,12 +197,13 @@ const PeopleRecommendation = ({ profileUserId, flex = "col" }) => {
           {people.results &&
             people.results
               .filter((person) => person.id != profileUserId)
+              .slice(0, flex === "col" ? 4 : 6) // Limit display for better UX
               .map((person, index) => (
                 <div
                   className={`flex flex-${flex} h-full ${
                     flex == "wrap"
-                      ? "lg:w-[25%] md:w-[50%] sm:w-full max-sm:w-full p-2"
-                      : "lg:w-full py-2"
+                      ? "lg:w-[48%] md:w-[48%] sm:w-full max-sm:w-full p-2"
+                      : "lg:w-full py-3"
                   }`}
                   key={person.id}
                 >
@@ -104,15 +212,15 @@ const PeopleRecommendation = ({ profileUserId, flex = "col" }) => {
                       flex == "col" ? "row" : "col"
                     } gap-x-4 w-full ${
                       flex == "wrap" &&
-                      "rounded-lg border border-gray p-4 h-[20rem] justify-between items-center"
+                      "rounded-lg border border-gray-200 p-4 h-[18rem] justify-between items-center hover:shadow-md transition-shadow duration-200"
                     }`}
                   >
                     <div
                       className={`${
                         flex == "col"
-                          ? "w-[60px] h-[60px]"
-                          : "max-w-[120px] h-[120px] border border-gray"
-                      } rounded-full cursor-pointer flex flex-row items-start justify-center ${
+                          ? "w-[50px] h-[50px]"
+                          : "max-w-[80px] h-[80px] border border-gray-200"
+                      } rounded-full cursor-pointer flex flex-row items-center justify-center overflow-hidden ${
                         flex == "wrap" && "justify-center items-center"
                       }`}
                       onClick={() => {
@@ -120,19 +228,16 @@ const PeopleRecommendation = ({ profileUserId, flex = "col" }) => {
                         window.location.reload();
                       }}
                     >
-                      {person.profilePicture && (
+                      {person.profilePicture ? (
                         <img
                           src={person.profilePicture}
-                          alt=""
-                          className={`${
-                            flex == "col"
-                              ? "max-w-[48px] h-[48px]"
-                              : "max-w-[100px] h-[100px]"
-                          } rounded-full`}
+                          alt={`${person.firstName} ${person.lastName}`}
+                          className="w-full h-full object-cover"
                         />
-                      )}
-                      {!person.profilePicture && (
-                        <i className="fas fa-user-circle text-5xl"></i>
+                      ) : (
+                        <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                          <i className="fas fa-user text-gray-600 text-xl"></i>
+                        </div>
                       )}
                     </div>
                     <div
@@ -143,11 +248,13 @@ const PeopleRecommendation = ({ profileUserId, flex = "col" }) => {
                       <div
                         className={`flex flex-col ${
                           flex == "wrap" &&
-                          "justify-between items-center w-full mt-4"
+                          "justify-between items-center w-full mt-3"
                         }`}
                       >
                         <span
-                          className="font-semibold text-lg cursor-pointer hover:underline"
+                          className={`font-semibold text-sm cursor-pointer hover:text-blue-600 transition-colors duration-200 ${
+                            flex == "wrap" ? "text-center" : ""
+                          }`}
                           onClick={() => {
                             navigate("/users/" + person.id);
                             window.location.reload();
@@ -156,9 +263,9 @@ const PeopleRecommendation = ({ profileUserId, flex = "col" }) => {
                           {person.firstName} {person.lastName}
                         </span>
                         <p
-                          className={`text-gray-400 text-[14px] cursor-pointer ${
+                          className={`text-gray-500 text-xs mt-1 cursor-pointer ${
                             flex == "wrap" &&
-                            "flex justify-center items-center w-full text-center"
+                            "flex justify-center items-center w-full text-center mt-2"
                           }`}
                           onClick={() => {
                             navigate("/users/" + person.id);
@@ -166,8 +273,10 @@ const PeopleRecommendation = ({ profileUserId, flex = "col" }) => {
                           }}
                         >
                           {person.bio &&
-                            person.bio.slice(0, 70) +
-                              (person.bio.length > 70 ? "..." : "")}
+                            person.bio.slice(0, flex === "col" ? 50 : 80) +
+                              (person.bio.length > (flex === "col" ? 50 : 80)
+                                ? "..."
+                                : "")}
                           {!person.bio &&
                             person.department &&
                             "Department of " + DEPARTMENTS[person.department]}
@@ -175,56 +284,78 @@ const PeopleRecommendation = ({ profileUserId, flex = "col" }) => {
                             !person.department &&
                             "Alumni Portal User"}
                         </p>
-                        {person.mutualConnections.length > 0 && (
+                        {person.cityName && (
                           <p
-                            className="text-gray-400 text-[14px] cursor-pointer"
-                            onClick={() => {
-                              navigate("/users/" + person.id);
-                              window.location.reload();
-                            }}
+                            className={`text-gray-400 text-xs mt-1 ${
+                              flex == "wrap" ? "text-center" : ""
+                            }`}
                           >
-                            {person.mutualConnections.length} mutual connections
+                            <i className="fas fa-map-marker-alt mr-1"></i>
+                            {person.cityName}
                           </p>
                         )}
                       </div>
-                      <div className="flex pt-2">
+                      {/* <div
+                        className={`flex mt-3 ${
+                          flex == "wrap" ? "w-full justify-center" : ""
+                        }`}
+                      >
                         {person.isConnected == "not_connected" && (
                           <button
                             key={person.id}
-                            className="border border-gray rounded-l-full rounded-r-full text-gray-500 font-medium w-40 h-10 hover:bg-[#ebebebeb] hover:border-2 transition duration-100 ease-in-out"
+                            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors duration-200 flex items-center"
                             onClick={(e) => {
                               handleConnect(e, person);
                             }}
                           >
-                            <i className="fa-solid fa-user-plus mr-2 "></i>
+                            <i className="fas fa-user-plus mr-2"></i>
                             Connect
                           </button>
                         )}
                         {person.isConnected == "pending" && (
                           <button
                             key={person.id}
-                            className="border border-gray rounded-l-full rounded-r-full text-gray-500 font-medium w-40 h-10 bg-[#ebebebeb]"
+                            className="bg-gray-200 text-gray-600 text-xs font-medium px-4 py-2 rounded-lg cursor-not-allowed flex items-center"
                             disabled
                           >
-                            <i className="fa-solid fa-check mr-2 "></i>
+                            <i className="fas fa-check mr-2"></i>
                             Requested
                           </button>
                         )}
-                      </div>
+                        {person.isConnected == "connected" && (
+                          <button
+                            key={person.id}
+                            className="bg-green-100 text-green-700 text-xs font-medium px-4 py-2 rounded-lg cursor-default flex items-center"
+                            disabled
+                          >
+                            <i className="fas fa-check mr-2"></i>
+                            Connected
+                          </button>
+                        )}
+                      </div> */}
                     </div>
                   </div>
-                  {index != people.results.length - 1 && flex == "col" && (
-                    <hr className="w-11/12  h-[1px] border-gray mx-auto mt-4" />
-                  )}
-                  {index == people.results.length - 1 && flex == "col" && (
-                    <hr className="w-11/12 border-white mx-auto mt-4" />
-                  )}
+                  {index !=
+                    people.results
+                      .filter((p) => p.id != profileUserId)
+                      .slice(0, flex === "col" ? 4 : 6).length -
+                      1 &&
+                    flex == "col" && (
+                      <hr className="w-full h-[1px] border-gray-200 mx-auto mt-3" />
+                    )}
                 </div>
               ))}
-          {people.next && (
-            <p className="text-center mt-2 pt-2 pb-2 cursor-pointer border-t border-gray hover:bg-[#ebebebeb]">
-              Show More
-            </p>
+
+          {/* Show more button for mobile/tablet */}
+          {flex === "col" && people.results && people.results.length > 4 && (
+            <div className="w-full pt-4 border-t border-gray-200">
+              <button
+                className="w-full text-center py-2 text-blue-600 hover:text-blue-700 text-sm font-medium hover:bg-blue-50 rounded-lg transition-colors duration-200"
+                onClick={() => navigate("/people")}
+              >
+                Show more suggestions
+              </button>
+            </div>
           )}
         </div>
       </div>

@@ -11,28 +11,18 @@ import logo from "../assets/logo.svg";
 import ReactJoyride from "react-joyride";
 
 const navItems = [
-  { item: "Feed", link: "/feed", icon: "fa-solid fa-home" },
-  {
-    item: "Opportunities",
-    link: "/opportunities",
-    icon: "fa-solid fa-briefcase",
-  },
-  {
-    item: "Connections",
-    link: "/connections",
-    icon: "fa-solid fa-user-friends",
-  },
-  { item: "Events", link: "/events", icon: "fa-solid fa-calendar" },
-  { item: "Blogs", link: "/blogs", icon: "fa-solid fa-newspaper" },
-  { item: "Batches", link: "/batches", icon: "fa-solid fa-users" },
-  // { item: "Directory", link: "/directory", icon: "fa-solid fa-address-book" },
-  // { item: "Donations", link: "/donations", icon: "fa-solid fa-donate" },
-  // { item: "Feedback", link: "/feedback", icon: "fa-solid fa-comment-alt" },
+  { item: "FEED", link: "/feed" },
+  { item: "OPPORTUNITIES", link: "/opportunities" },
+  { item: "CONNECTIONS", link: "/connections" },
+  { item: "EVENTS", link: "/events" },
+  { item: "BLOGS", link: "/blogs" },
+  { item: "BATCHES", link: "/batches" },
 ];
 
 function Nav() {
   const [isOpen, setIsOpen] = useState(false);
   const { auth, setAuth } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const [state, setState] = useState({
     run: false,
@@ -76,8 +66,6 @@ function Nav() {
     }
   };
 
-  const navigate = useNavigate();
-
   const handleLogout = () => {
     setAuth({ login: false, uid: "", uname: "" });
     localStorage.clear();
@@ -96,18 +84,20 @@ function Nav() {
       navigate("/auth");
     }
 
-    axios
-      .get(ApiConfig.users + "/" + userId + "/", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
-      .then((res) => {
-        setUser(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    if (accessToken && userId) {
+      axios
+        .get(ApiConfig.users + "/" + userId + "/", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        .then((res) => {
+          setUser(res.data);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
 
     window.addEventListener("click", handleClickOutside);
 
@@ -118,68 +108,138 @@ function Nav() {
 
   return (
     <>
-      <div className="nav w-full h-16 flex justify-between items-center px-4 bg-white shadow-2xl">
-        <div
-          className="flex justify-start items-center cursor-pointer"
-          onClick={() => {
-            navigate("/");
-          }}
-        >
-          <img src={logo} width="200px" alt="" />
-
-          {/* <div className="w-full flex justify-between items-center pl-4">
-            <div>
-              <Link to="/" className="hover:cursor-pointer">
-                <img src={homeIcon} width="30px" alt="home" />
-              </Link>
-            </div>
-          </div> */}
-        </div>
-
-        <div
-          id="desktop-item-list"
-          className="flex md:gap-x-2 text-black text-lg max-lg:hidden"
-        >
-          {navItems.map((item, index) => (
-            <NavLink
-              key={index}
-              to={item.link}
-              className={({ isActive }) =>
-                isActive
-                  ? "text-primary"
-                  : "hover:text-red transition-all duration-300"
-              }
+      {/* Main Navbar */}
+      <nav className="nav bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div
+              className="flex-shrink-0 cursor-pointer"
+              onClick={() => navigate("/")}
             >
-              <div className="has-tooltip">
-                <span className="tooltip bg-white rounded-lg border border-gray shadow-lg mt-8 text-black p-4">
-                  {item.item}
-                </span>
-                <i className={`${item.icon} px-4 text-xl`}></i>
-              </div>
-            </NavLink>
-          ))}
-        </div>
+              <img src={logo} alt="M2ConneX" className="h-10 w-auto" />
+            </div>
 
-        <div className="flex justify-center items-center gap-x-2">
-          <Profile
-            id="profile"
-            dropdownRef={dropdownRef}
-            user={user}
-            toggleVisibility={toggleVisibility}
-            isVisible={isVisible}
-            setIsVisible={setIsVisible}
-            handleLogout={handleLogout}
-            navigate={navigate}
-          />
-          {/* <button onClick={handleLogout} className='px-3 py-2 rounded bg-primary text-white hover:bg-opacity-80'>LOGOUT</button> */}
-          <div className="pl-4 max-lg:block hidden" id="menutoggle">
-            <button onClick={toggleMenu}>
-              <i className="fa-solid fa-bars text-black text-xl"></i>
-            </button>
+            {/* Desktop Navigation Links */}
+            <div
+              id="desktop-item-list"
+              className="hidden xl:flex items-center space-x-4"
+            >
+              {navItems.map((item, index) => (
+                <NavLink
+                  key={index}
+                  to={item.link}
+                  className={({ isActive }) =>
+                    `relative text-xs font-medium tracking-wide transition-all duration-300 py-4 px-2 ${
+                      isActive
+                        ? "text-gray-900"
+                        : "text-gray-700 hover:text-gray-900"
+                    } after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:transition-all after:duration-300 ${
+                      isActive
+                        ? "after:bg-blue-500 after:scale-x-100"
+                        : "after:bg-gray-300 after:scale-x-0 hover:after:scale-x-100"
+                    }`
+                  }
+                >
+                  {item.item}
+                </NavLink>
+              ))}
+            </div>
+
+            {/* Profile and Mobile Menu */}
+            <div className="flex items-center space-x-4">
+              {/* Profile Section */}
+              <Profile
+                dropdownRef={dropdownRef}
+                user={user}
+                toggleVisibility={toggleVisibility}
+                isVisible={isVisible}
+                setIsVisible={setIsVisible}
+                handleLogout={handleLogout}
+                navigate={navigate}
+              />
+
+              {/* Mobile menu button */}
+              <div className="xl:hidden" id="menutoggle">
+                <button
+                  onClick={toggleMenu}
+                  className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-all duration-200"
+                  aria-expanded={isOpen}
+                >
+                  <span className="sr-only">Open main menu</span>
+                  {/* Menu icon */}
+                  <svg
+                    className={`${isOpen ? "hidden" : "block"} h-6 w-6`}
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                  {/* Close icon */}
+                  <svg
+                    className={`${isOpen ? "block" : "hidden"} h-6 w-6`}
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      {isOpen ? <Responsive isOpen={isOpen} toggleMenu={toggleMenu} /> : null}
+
+        {/* Mobile Navigation Menu */}
+        <div
+          id="mobile-item-list"
+          className={`xl:hidden transition-all duration-300 ease-in-out ${
+            isOpen
+              ? "max-h-screen opacity-100"
+              : "max-h-0 opacity-0 overflow-hidden"
+          }`}
+        >
+          <div className="px-4 pt-2 pb-6 space-y-1 bg-white border-t border-gray-200 shadow-lg">
+            {navItems.map((item, index) => (
+              <NavLink
+                key={index}
+                to={item.link}
+                onClick={() => setIsOpen(false)}
+                className={({ isActive }) =>
+                  `block px-3 py-2 text-xs font-medium tracking-wide transition-all duration-200 rounded-lg ${
+                    isActive
+                      ? "text-blue-600 bg-blue-50 border-l-4 border-blue-500"
+                      : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                  }`
+                }
+              >
+                {item.item}
+              </NavLink>
+            ))}
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div
+          className="xl:hidden fixed inset-0 bg-black bg-opacity-25 z-40"
+          onClick={() => setIsOpen(false)}
+        ></div>
+      )}
 
       <ReactJoyride
         continuous
@@ -196,34 +256,6 @@ function Nav() {
         }}
       />
     </>
-  );
-}
-
-function Responsive({ isOpen, toggleMenu }) {
-  return (
-    <div
-      id="mobile-item-list"
-      className={`z-10 ${isOpen
-        ? "w-full hidden flex-col lg:gap-x-4 text-black text-lg fixed right-0 top-16 bg-[#f4f2ee] border-b pt-2 max-lg:flex"
-        : "hidden"
-        }`}
-    >
-      {useLockBodyScroll()}
-      {navItems.map((item, index) => (
-        <NavLink
-          key={index}
-          to={item.link}
-          onClick={toggleMenu}
-          className={({ isActive }) =>
-            isActive
-              ? "px-4 py-1 text-primary"
-              : "px-4 py-1 hover:text-red transition-all duration-300"
-          }
-        >
-          {item.item}
-        </NavLink>
-      ))}
-    </div>
   );
 }
 
@@ -252,60 +284,169 @@ function Profile({
     return () => {
       window.removeEventListener("click", handleWindowClick);
     };
-  }, [handleClickOutside]);
+  }, []);
 
   return (
-    <div
-      className="userprofile hover:cursor-pointer w-[40px] h-12 max-w-[40px] min-w-[52px] mb-1 rounded-[2rem] flex flex-col items-center transition-all duration-300"
-      ref={dropdownRef}
-    >
-      {user.profilePicture ? (
-        <img
-          src={user.profilePicture}
-          alt=""
-          width="35px"
-          className="rounded-xl focus:outline-none"
-          onClick={toggleVisibility}
-        />
-      ) : (
-        <i
-          className="fa-solid fa-user-circle fa-3x"
-          onClick={toggleVisibility}
-        ></i>
-      )}
-      {isVisible ? (
-        <div className="absolute right-0 z-10 flex flex-col justify-evenly items-center mt-16 bg-white rounded-b-xl shadow-xl border border-gray transition-opacity duration-300">
-          <ul className="flex flex-col">
-            <li
-              className="hover:bg-[#f4f2ee] text-black flex flex-row gap-x-4 items-center justify-start cursor-pointer px-7 py-4"
+    <div className="userprofile relative" ref={dropdownRef}>
+      {/* Profile Button */}
+      <button
+        onClick={toggleVisibility}
+        className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        {user.profilePicture ? (
+          <img
+            src={user.profilePicture}
+            alt="Profile"
+            className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+            <svg
+              className="w-5 h-5 text-gray-600"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+        )}
+        <span className="hidden md:block text-sm font-medium">
+          {user.firstName || "User"}
+        </span>
+        <svg
+          className={`w-4 h-4 transition-transform duration-200 ${
+            isVisible ? "transform rotate-180" : ""
+          }`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
+
+      {/* Dropdown Menu */}
+      {isVisible && (
+        <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+          {/* User Info */}
+          <div className="px-4 py-3 border-b border-gray-200">
+            <p className="text-sm font-medium text-gray-900">
+              {user.firstName} {user.lastName}
+            </p>
+            <p className="text-sm text-gray-500 truncate">{user.email}</p>
+          </div>
+
+          {/* Menu Items */}
+          <div className="py-2">
+            <button
               onClick={() => {
                 navigate("/profile");
                 setIsVisible(false);
               }}
+              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-200"
             >
-              <i className="fa-solid fa-user-circle fa-xl pt-1"></i>
-              <p className="text-md">Profile</p>
-            </li>
-            <li
-              className="hover:bg-[#f4f2ee] text-black flex flex-row gap-x-4 items-center justify-start cursor-pointer px-7 py-4"
+              <svg
+                className="w-4 h-4 mr-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+              Your Profile
+            </button>
+
+            <button
               onClick={() => {
                 navigate("/notifications");
                 setIsVisible(false);
               }}
+              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-200"
             >
-              <i className="fa-solid fa-bell fa-xl pt-1"></i>
-              <p className="text-md">Notifications</p>
-            </li>
-            <li
-              className="hover:bg-[#f4f2ee] rounded-b-xl text-black flex flex-row gap-x-4 items-center justify-start cursor-pointer px-8 py-4"
+              <svg
+                className="w-4 h-4 mr-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 17h5l-5 5v-5zM9 3H4a1 1 0 00-1 1v6a1 1 0 001 1h1m0 0h4a1 1 0 001-1V4a1 1 0 00-1-1H9m0 0V3z"
+                />
+              </svg>
+              Notifications
+            </button>
+
+            {/* <button
+              onClick={() => {
+                navigate("/settings");
+                setIsVisible(false);
+              }}
+              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-200"
+            >
+              <svg
+                className="w-4 h-4 mr-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+              Settings
+            </button> */}
+          </div>
+
+          {/* Logout */}
+          <div className="border-t border-gray-200 pt-2">
+            <button
               onClick={handleLogout}
+              className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors duration-200"
             >
-              <i className="fa-solid fa-sign-out fa-lg pt-1"></i>
-              <p className="text-md">Log out</p>
-            </li>
-          </ul>
+              <svg
+                className="w-4 h-4 mr-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
+              </svg>
+              Sign Out
+            </button>
+          </div>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }

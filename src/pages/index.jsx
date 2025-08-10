@@ -1,8 +1,8 @@
-import React from 'react'
-import Hero from '../components/Hero'
-import UpcomingEvent from '../components/UpcomingEvent'
-import TopStories from '../components/TopStories'
-import Testimonials from '../components/testimonials'
+import React from "react";
+import Hero from "../components/Hero";
+import UpcomingEvent from "../components/UpcomingEvent";
+import TopStories from "../components/TopStories";
+// import Testimonials from '../components/testimonials'
 
 const Index = () => {
   return (
@@ -10,9 +10,9 @@ const Index = () => {
       <Hero />
       <UpcomingEvent />
       <TopStories />
-      <Testimonials />
+      {/* <Testimonials /> */}
     </>
-  )
-}
+  );
+};
 
-export default Index
+export default Index;
