@@ -7,6 +7,18 @@ import formatDate from "../utils/date";
 import { EXPERIENCE } from "../utils/skills";
 import PeopleRecommendation from "../components/PeopleRecommendation";
 import { ToastContainer, toast } from "react-toastify";
+import {
+  FaFilePdf,
+  FaExternalLinkAlt,
+  FaPen,
+  FaThumbsUp,
+  FaComment,
+  FaShare,
+  FaBriefcase,
+  FaStar,
+  FaEdit,
+  FaPlus,
+} from "react-icons/fa";
 
 export default function UserProfile() {
   const [user, setUser] = useState({});
@@ -610,7 +622,6 @@ export default function UserProfile() {
               </div>
             </div>
           </div>
-
           {/* Analytics Card */}
           <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-6">
             <div className="flex items-center justify-between mb-6">
@@ -627,8 +638,8 @@ export default function UserProfile() {
               {/* Profile Views */}
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200 hover:shadow-md transition-all duration-300 transform hover:scale-105">
                 <div className="flex items-center mb-3">
-                  <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mr-4">
-                    <i className="fas fa-eye text-white text-lg"></i>
+                  <div className="w-12 h-12 bg-blue-500 text-gray-500 rounded-lg flex items-center justify-center mr-4">
+                    <i className="fas fa-eye text-lg"></i>
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">
@@ -645,8 +656,8 @@ export default function UserProfile() {
               {/* Post Impressions */}
               <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200 hover:shadow-md transition-all duration-300 transform hover:scale-105">
                 <div className="flex items-center mb-3">
-                  <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mr-4">
-                    <i className="fas fa-chart-line text-white text-lg"></i>
+                  <div className="w-12 h-12 bg-green-500 text-gray-500 rounded-lg flex items-center justify-center mr-4">
+                    <i className="fas fa-chart-line text-lg"></i>
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">
@@ -663,8 +674,8 @@ export default function UserProfile() {
               {/* Search Appearances */}
               <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200 hover:shadow-md transition-all duration-300 transform hover:scale-105 sm:col-span-2 lg:col-span-1">
                 <div className="flex items-center mb-3">
-                  <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mr-4">
-                    <i className="fas fa-search text-white text-lg"></i>
+                  <div className="w-12 h-12 bg-purple-500 text-gray-500 rounded-lg flex items-center justify-center mr-4">
+                    <i className="fas fa-search text-lg"></i>
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">
@@ -684,9 +695,8 @@ export default function UserProfile() {
               <i className="fas fa-arrow-right ml-2"></i>
             </button>
           </div>
-
           {/* About Section */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-6">
+          {/* <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                 About
@@ -717,39 +727,39 @@ export default function UserProfile() {
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Resume Section */}
-          {user.resume && (
+          </div> */}
+          {/*  Resume Section */}
+          {/* {user.resume && (
             <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                   Resume
                 </h2>
               </div>
-
               <div className="flex items-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-300">
                 <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mr-4">
-                  <i className="fas fa-file-pdf text-white text-lg"></i>
+                  <FaFilePdf className="text-white text-lg" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">Resume.pdf</h3>
+                  <h3 className="font-semibold text-gray-900">
+                    {user.resume.split("/").pop()}
+                  </h3>
                   <p className="text-sm text-gray-600">
                     Click to view or download
                   </p>
                 </div>
-                <button
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105"
-                  onClick={() => window.open(user.resume, "_blank")}
+                <a
+                  href={user.resume}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 flex items-center"
                 >
-                  <i className="fas fa-external-link-alt mr-2"></i>
+                  <FaExternalLinkAlt className="mr-2" />
                   View
-                </button>
+                </a>
               </div>
             </div>
-          )}
-
-          {/* Activity Section */}
+          )} */}
           <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
@@ -759,7 +769,6 @@ export default function UserProfile() {
                 {userActivity?.results?.length || 0} activities
               </span>
             </div>
-
             <div className="space-y-4">
               {userActivity.results && userActivity.results.length > 0 ? (
                 userActivity.results.slice(0, 3).map((act, index) => (
@@ -777,23 +786,20 @@ export default function UserProfile() {
                     <div className="flex-shrink-0">
                       {act.type === "feed" ? (
                         <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
-                          <i className="fas fa-pen text-white"></i>
+                          <FaPen className="text-gray-500" />
                         </div>
                       ) : (
                         <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
-                          <i
-                            className={`fas ${
-                              act.data.action === "LIKE"
-                                ? "fa-thumbs-up"
-                                : act.data.action === "COMMENT"
-                                ? "fa-comment"
-                                : "fa-share"
-                            } text-white`}
-                          ></i>
+                          {act.data.action === "LIKE" ? (
+                            <FaThumbsUp className="text-gray-500" />
+                          ) : act.data.action === "COMMENT" ? (
+                            <FaComment className="text-gray-500" />
+                          ) : (
+                            <FaShare className="text-gray-500" />
+                          )}
                         </div>
                       )}
                     </div>
-
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
                         <p className="text-sm font-medium text-gray-900">
@@ -809,15 +815,9 @@ export default function UserProfile() {
                             : "shared"}
                         </span>
                         <span className="text-sm text-gray-400">
-                          •{" "}
-                          {formatDate(
-                            act.type === "feed"
-                              ? act.data.createdAt
-                              : act.data.createdAt
-                          )}
+                          • {formatDate(act.data.createdAt)}
                         </span>
                       </div>
-
                       <h3 className="font-medium text-gray-900 mb-1 group-hover:text-blue-600 transition-colors duration-300">
                         #
                         {act.type === "feed"
@@ -827,7 +827,6 @@ export default function UserProfile() {
                               .slice(0, 3)
                               .join(", #")}
                       </h3>
-
                       <p className="text-gray-600 text-sm line-clamp-2">
                         {act.type === "feed"
                           ? act.data.body.slice(0, 100) +
@@ -835,27 +834,25 @@ export default function UserProfile() {
                           : act.data.feedBody.slice(0, 100) +
                             (act.data.feedBody.length > 100 ? "..." : "")}
                       </p>
-
                       <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
                         <span className="flex items-center gap-1">
-                          <i className="fas fa-thumbs-up"></i>
+                          <FaThumbsUp />
                           {act.type === "feed"
                             ? act.data.likesCount
                             : act.data.feedLikesCount}
                         </span>
                         <span className="flex items-center gap-1">
-                          <i className="fas fa-comment"></i>
+                          <FaComment />
                           {act.type === "feed"
                             ? act.data.commentsCount
                             : act.data.feedCommentsCount}
                         </span>
                         <span className="flex items-center gap-1">
-                          <i className="fas fa-share"></i>
+                          <FaShare />
                           {act.type === "feed" ? act.data.sharesCount : 0}
                         </span>
                       </div>
                     </div>
-
                     {act.type === "feed" && act.data.images?.[0]?.image && (
                       <div className="flex-shrink-0">
                         <img
@@ -869,7 +866,7 @@ export default function UserProfile() {
                 ))
               ) : (
                 <div className="text-center py-12">
-                  <i className="fas fa-chart-line text-4xl text-gray-300 mb-4"></i>
+                  <FaShare className="text-4xl text-gray-300 mb-4 mx-auto" />
                   <p className="text-gray-500 mb-4">No recent activity</p>
                   <p className="text-sm text-gray-400">
                     Start posting to see your activity here
@@ -877,35 +874,31 @@ export default function UserProfile() {
                 </div>
               )}
             </div>
-
             {userActivity.next && (
               <button
                 className="w-full mt-6 py-3 text-blue-600 font-medium hover:bg-blue-50 rounded-xl transition-colors duration-300 border border-blue-200 hover:border-blue-300"
                 onClick={() => fetchUserActivity({ next: userActivity.next })}
               >
                 Load more activity
-                <i className="fas fa-arrow-down ml-2"></i>
+                <FaShare className="ml-2 inline" />
               </button>
             )}
           </div>
-
-          {/* Experience Section */}
           <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                 Experience
               </h2>
               <button
-                className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-all duration-300 transform hover:scale-105"
+                className="bg-blue-600 hover:bg-blue-700 text-gray-500 p-2 rounded-lg transition-all duration-300 transform hover:scale-105"
                 onClick={() => {
                   document.title = "Add Experience | MMCOE Alumni Portal";
                   setShowExperienceModal(true);
                 }}
               >
-                <i className="fas fa-plus"></i>
+                <FaPlus />
               </button>
             </div>
-
             <div className="space-y-6">
               {userExperience.results && userExperience.results.length > 0 ? (
                 userExperience.results.map((exp, index) => (
@@ -919,10 +912,9 @@ export default function UserProfile() {
                   >
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-md">
-                        <i className="fas fa-briefcase text-white"></i>
+                        <FaBriefcase className="text-gray-500" />
                       </div>
                     </div>
-
                     <div className="flex-1">
                       <div className="flex items-start justify-between">
                         <div>
@@ -949,7 +941,7 @@ export default function UserProfile() {
                           )}
                         </div>
                         <button className="text-gray-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                          <i className="fas fa-edit"></i>
+                          <FaEdit />
                         </button>
                       </div>
                     </div>
@@ -957,7 +949,7 @@ export default function UserProfile() {
                 ))
               ) : (
                 <div className="text-center py-12">
-                  <i className="fas fa-briefcase text-4xl text-gray-300 mb-4"></i>
+                  <FaBriefcase className="text-4xl text-gray-300 mb-4 mx-auto" />
                   <p className="text-gray-500 mb-4">No experience added yet</p>
                   <button
                     className="bg-blue-600 hover:bg-blue-700 text-gray-500 border border-black px-6 py-2 rounded-lg font-medium transition-colors duration-300"
@@ -968,7 +960,6 @@ export default function UserProfile() {
                 </div>
               )}
             </div>
-
             {userExperience.next && (
               <button
                 className="w-full mt-6 py-3 text-blue-600 font-medium hover:bg-blue-50 rounded-xl transition-colors duration-300 border border-blue-200 hover:border-blue-300"
@@ -977,12 +968,10 @@ export default function UserProfile() {
                 }
               >
                 Load more experiences
-                <i className="fas fa-arrow-down ml-2"></i>
+                <FaShare className="ml-2 inline" />
               </button>
             )}
           </div>
-
-          {/* Skills Section */}
           <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-8">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
@@ -995,10 +984,9 @@ export default function UserProfile() {
                   setShowSkillsModal(true);
                 }}
               >
-                <i className="fas fa-plus"></i>
+                <FaPlus />
               </button>
             </div>
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {userSkills.results && userSkills.results.length > 0 ? (
                 userSkills.results.map((skill, index) => (
@@ -1012,9 +1000,8 @@ export default function UserProfile() {
                     }}
                   >
                     <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <i className="fas fa-star text-white text-sm"></i>
+                      <FaStar className="text-gray-500 text-sm" />
                     </div>
-
                     <div className="flex-1">
                       <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
                         {skill.skillName}
@@ -1023,15 +1010,14 @@ export default function UserProfile() {
                         {EXPERIENCE[skill.experience]}
                       </p>
                     </div>
-
                     <button className="text-gray-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                      <i className="fas fa-edit text-sm"></i>
+                      <FaEdit />
                     </button>
                   </div>
                 ))
               ) : (
                 <div className="col-span-full text-center py-12">
-                  <i className="fas fa-star text-4xl text-gray-300 mb-4"></i>
+                  <FaStar className="text-4xl text-gray-300 mb-4 mx-auto" />
                   <p className="text-gray-500 mb-4">No skills added yet</p>
                   <button
                     className="bg-blue-600 hover:bg-blue-700 text-gray-500 border border-black px-6 py-2 rounded-lg font-medium transition-colors duration-300"
@@ -1042,14 +1028,13 @@ export default function UserProfile() {
                 </div>
               )}
             </div>
-
             {userSkills.next && (
               <button
                 className="w-full mt-6 py-3 text-blue-600 font-medium hover:bg-blue-50 rounded-xl transition-colors duration-300 border border-blue-200 hover:border-blue-300"
                 onClick={() => fetchUserSkills({ next: userSkills.next })}
               >
                 Load more skills
-                <i className="fas fa-arrow-down ml-2"></i>
+                <FaShare className="ml-2 inline" />
               </button>
             )}
           </div>
