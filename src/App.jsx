@@ -22,6 +22,7 @@ import PostPage from "./pages/post_page.jsx";
 import ConnectionPage from "./pages/ConnectionsPage.jsx";
 import BlogPage from "./components/blogs/BlogPage.jsx";
 import WriteBlog from "./components/blogs/WriteBlog.jsx";
+import PeoplePage from "./components/PeoplePage.jsx";
 
 const noAuthRouter = createBrowserRouter([
   {
@@ -118,6 +119,10 @@ const noAuthRouter = createBrowserRouter([
         element: <Auth />,
       },
       {
+        path: "/people",
+        element: <PeoplePage />,
+      },
+      {
         path: "/*",
         element: <Page_Not_Found />,
       },
@@ -184,6 +189,10 @@ const AuthRouter = createBrowserRouter([
       {
         path: "/connections",
         element: <ConnectionPage />,
+      },
+      {
+        path: "/people",
+        element: <PeoplePage />,
       },
       {
         path: "/*",
