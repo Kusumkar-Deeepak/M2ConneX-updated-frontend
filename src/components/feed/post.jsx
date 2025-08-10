@@ -264,7 +264,7 @@ const Post = ({
         <div className="flex items-center space-x-2">
           {!post.isEditable && postUserIsConnected === "not_connected" && (
             <button
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors duration-200"
+              className="bg-blue-600 hover:bg-blue-700 text-gray-500 text-sm font-medium px-4 py-2 rounded-lg transition-colors duration-200"
               onClick={(e) => {
                 handleConnect(e, post.user);
                 setPostUserIsConnected("pending");

@@ -1,12 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import PeopleRecommendation from "./PeopleRecommendation";
+import axios from "axios";
 import { FaUser, FaMapMarkerAlt } from "react-icons/fa";
 import DEPARTMENTS from "../utils/departments";
+import ApiConfig from "../utils/ApiConfig";
 
 const PeoplePage = () => {
   const [allPeople, setAllPeople] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      navigate("/auth");
+      return;
+    }
+    axios
+      .get(ApiConfig.recommendedConnection, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      .then((res) => {
+        setAllPeople(res.data.results || []);
+      })
+      .catch((err) => {
+        setAllPeople([]);
+      });
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f4f2ee] to-[#e9e7ef] flex justify-center items-start py-6 px-2">
@@ -17,8 +36,7 @@ const PeoplePage = () => {
         <p className="text-center text-gray-500 mb-8 text-base">
           Expand your network by connecting with alumni and professionals.
         </p>
-        <PeopleRecommendation onPeopleLoaded={setAllPeople} flex="wrap" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
           {allPeople.map((person) => (
             <div
               key={person.id}
@@ -50,9 +68,6 @@ const PeoplePage = () => {
                   <p className="text-blue-500 text-xs mt-2">
                     {DEPARTMENTS[person.department] || person.department}
                   </p>
-                )}
-                {person.email && (
-                  <p className="text-gray-400 text-xs mt-2">{person.email}</p>
                 )}
                 {person.cityName && (
                   <p className="text-gray-400 text-xs mt-2 flex items-center justify-center">
